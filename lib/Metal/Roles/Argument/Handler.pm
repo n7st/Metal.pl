@@ -13,9 +13,13 @@ sub args_as_hashref {
     my ($nick, $host)  = $self->split_nick_and_host($args[6]);
     my ($ident, $mask) = $self->split_ident_and_mask($host);
 
+    my @arg_list =       $self->_argument_list($args[8]);
+    my @clean_arg_list = shift @arg_list;
+
     return {
         input_location => $args[7][0],
-        list           => $self->_argument_list($args[8]),
+        list           => \@arg_list,
+        list_with_cmd  => \@clean_arg_list,
         original       => $args[8],
 
         from => {
@@ -36,9 +40,7 @@ sub _argument_list {
 
     # Boilerplate in case of future additions
 
-    my @args = split /\ /, $string;
-
-    return \@args;
+    return split /\ /, $string;
 }
 
 ################################################################################

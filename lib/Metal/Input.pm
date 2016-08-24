@@ -121,7 +121,7 @@ sub _handle_command {
     my $bot    = shift;
     my $args   = shift;
 
-    my $cmd = $args->{list}->[0];
+    my $cmd = $args->{list_with_cmd}->[0];
     my $output;
 
     return unless $cmd && $cmd =~ /^$self->{config}->{trigger}/;

@@ -72,6 +72,10 @@ sub _build_routes {
             class   => $self->CONCERT,
             routine => 'highscores',
         },
+        'usershows' => {
+            class   => $self->CONCERT,
+            routine => 'user_band_total',
+        },
 
         # Metal::Handler::Pizza
         'pizza++' => {

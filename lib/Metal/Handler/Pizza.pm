@@ -38,9 +38,8 @@ sub add_new_pizza {
 sub highscores {
     my $self = shift;
 
-    my $output = "The top pizza eaters are: ";
     my @rows;
-
+    my $output = "The top pizza eaters are: ";
     my $pizzas = $self->schema->resultset('Pizza')->search_rs({}, {
         '+select' => [{
             ''  => \'COUNT(`me`.`user_id`)',
