@@ -12,8 +12,11 @@ with 'Metal::Roles::DB';
 sub add_new_pizza {
     my $self = shift;
 
-    my $user = $self->_user_for_hostmask($self->args->{hostmask}, $self->args->{nick});
     my $output;
+    my $user = $self->_user_for_hostmask(
+        $self->args->{from}->{hostmask},
+        $self->args->{from}->{nick}
+    );
 
     my $pizza = $self->schema->resultset('Pizza')->create({
         user_id => $user->id,
@@ -97,8 +100,11 @@ sub info {
 sub remove_last_pizza {
     my $self = shift;
 
-    my $user = $self->_user_for_hostmask($self->args->{hostmask}, $self->args->{nick});
     my $output;
+    my $user = $self->_user_for_hostmask(
+        $self->args->{from}->{hostmask},
+        $self->args->{from}->{nick}
+    );
 
     my $pizza = $self->schema->resultset('Pizza')->search_rs({
         user_id => $user->id,

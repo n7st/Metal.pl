@@ -17,10 +17,42 @@ has args => (is => 'rw', isa => 'HashRef');
 
 ################################################################################
 
-sub start {
+sub _start {
+    my $self    = shift;
+    my $session = shift;
+    my $kernel  = shift;
+    my $heap    = shift;
+
+    my $bot = $heap->{irc};
+
+    $kernel->post($bot => register => 'all');
+
+    $kernel->post($bot => connect => {
+        Ircname  => $self->config->{server}->{ircname},
+        Nick     => $self->config->{server}->{nickname},
+        Port     => $self->config->{server}->{port},
+        Server   => $self->config->{server}->{host},
+        Username => $self->config->{server}->{ident},
+    });
+
+    print STDOUT "[SYSTEM] Connected\n";
+
+    return;
 }
 
 sub irc_001 {
+    my $self    = shift;
+    my $session = shift;
+    my $kernel  = shift;
+    my $heap    = shift;
+
+    my $bot = $heap->{irc};
+
+    foreach (@{$self->config->{channels}}) {
+        $kernel->post($bot => join => $_);
+    }
+
+    return;
 }
 
 sub irc_public {
@@ -28,6 +60,13 @@ sub irc_public {
     my $session = shift;
     my $kernel  = shift;
     my $heap    = shift;
+
+    my $args = $self->args_as_hashref(@_);
+
+    $self->_handle_command($kernel, $heap->{irc}, $args);
+    $self->_message_log('PUBLIC', $args);
+
+    return;
 }
 
 sub irc_private {
@@ -35,6 +74,12 @@ sub irc_private {
     my $session = shift;
     my $kernel  = shift;
     my $heap    = shift;
+
+    my $args = $self->args_as_hashref(@_);
+
+    $self->_message_log('PRIVATE', $args);
+
+    return;
 }
 
 sub irc_notice {
@@ -42,6 +87,12 @@ sub irc_notice {
     my $session = shift;
     my $kernel  = shift;
     my $heap    = shift;
+
+    my $args = $self->args_as_hashref(@_);
+
+    $self->_message_log('NOTICE', $args);
+
+    return;
 }
 
 sub test_input {
@@ -60,6 +111,55 @@ sub test_input {
     }
 
     return $output;
+}
+
+################################################################################
+
+sub _handle_command {
+    my $self   = shift;
+    my $kernel = shift;
+    my $bot    = shift;
+    my $args   = shift;
+
+    my $cmd = $args->{list}->[0];
+    my $output;
+
+    return unless $cmd && $cmd =~ /^$self->{config}->{trigger}/;
+    # i.e. !command where trigger is '!'
+
+    $cmd =~ s/^.//;
+
+    # Metal::Roles::Routes
+    my $handle = $self->routes->{$cmd};
+
+    if ($handle) {
+        my $class   = $handle->{class}->new({ args => $args });
+        my $routine = $handle->{routine};
+
+        $output = $class->$routine();
+    }
+
+    if ($output) {
+        $kernel->post($bot => privmsg => $args->{input_location} => $output);
+    }
+
+    return;
+}
+
+sub _message_log {
+    my $self = shift;
+    my $type = shift;
+    my $args = shift;
+
+    printf STDOUT (
+        "[%s] %s (%s): %s\n",
+        $type,
+        $args->{from}->{nick},
+        $args->{from}->{host},
+        $args->{original},
+    );
+
+    return;
 }
 
 ################################################################################

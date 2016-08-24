@@ -30,6 +30,20 @@ sub user_from_host {
     return $user;
 }
 
+sub split_ident_and_mask {
+    my $self   = shift;
+    my $string = shift;
+
+    return split /@/, $string;
+}
+
+sub split_nick_and_host {
+    my $self   = shift;
+    my $string = shift;
+
+    return split /!/, $string;
+}
+
 ################################################################################
 
 no Moose;

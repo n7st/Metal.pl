@@ -15,11 +15,17 @@ with qw/
 sub add_band {
     my $self = shift;
 
-    unless ($self->is_identified($self->args->{hostmask})) {
+    # TODO figure out a way to split the arguments from IRC
+
+    unless ($self->is_identified($self->args->{from}->{hostmask})) {
         return "You are not an identified user.";
     }
 
-    my $user = $self->user_from_host($self->args->{hostmask}, $self->args->{nick});
+    my $user = $self->user_from_host(
+        $self->args->{from}->{hostmask},
+        $self->args->{from}->{nick}
+    );
+
     my $band = $self->_band_from_name($self->args->{band}, $user);
 
     my $was_seen = $self->schema->resultset('UserBand')->create({
@@ -38,11 +44,14 @@ sub add_band {
 sub add_festival {
     my $self = shift;
 
-    unless ($self->is_identified($self->args->{hostmask})) {
+    unless ($self->args->{from}->{is_identified}) {
         return "You are not an identified user.";
     }
 
-    my $user     = $self->user_from_host($self->args->{hostmask}, $self->args->{nick});
+    my $user = $self->user_from_host(
+        $self->args->{from}->{hostmask},
+        $self->args->{from}->{nick}
+    );
     my $festival = $self->_festival_from_name($self->args->{festival}, $self->args->{date}, $user);
 
     my $was_at_festival = $self->schema->resultset('UserFestival')->create({

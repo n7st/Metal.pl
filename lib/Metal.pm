@@ -4,9 +4,9 @@ use Moose;
 
 use Metal::Input;
 
-################################################################################
+with 'Metal::Roles::Config';
 
-has config => (is => 'ro', isa => 'HashRef');
+################################################################################
 
 has input => (is => 'ro', isa => 'Metal::Input', lazy_build => 1);
 

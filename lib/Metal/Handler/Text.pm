@@ -6,32 +6,38 @@ extends 'Metal::Handler';
 
 ################################################################################
 
-sub dadjoke { sprintf("Hahahaha! %s, you're so funny!", shift->args->{nick}); }
-
-sub damson { 'https://i.imgur.com/7lZwLKc.jpg'; }
-
+sub damson   { 'https://i.imgur.com/7lZwLKc.jpg';                   }
 sub eatpizza { '............................................pizza'; }
+
+sub dadjoke {
+    my $self = shift;
+
+    return sprintf(
+        "Hahahaha! %s, you're so funny!",
+        $self->args->{from}->{nick}
+    );
+}
 
 sub flenny {
     my $self = shift;
 
     my @flennies = (
-        '',
-        '',
+        '(    ◉ ͜  ͡◔    )',
+        '(    ͡^ ͜  ͡^    )',
     );
 
     return $flennies[rand @flennies];
 }
 
-sub lemmy { ''; }
+sub lemmy { '( ͡° ͜ʖ ͡°:)'; }
 
 sub lenny {
     my $self = shift;
 
     my @lennies = (
-        '',
-        '',
-        '',
+        '( ͜。 ͡ʖ ͜。)',
+        '( ͡° ͜ʖ ͡°)',
+        'ᕦ( ͡° ͜ʖ ͡°)ᕤ',
     );
 
     return $lennies[rand @lennies];
