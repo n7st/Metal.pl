@@ -1,0 +1,13 @@
+database:
+    host: dsn:mysql:Metal
+    user: dbuser
+    password: dbpassword
+server:
+    host: irc.snoonet.org
+    port: 6667
+    ident: Metal
+    realname: Metal, Perl IRC bot
+    nickname: Metal_
+channels:
+    - '##test'
+
