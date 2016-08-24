@@ -1,5 +1,5 @@
 database:
-    host: dsn:mysql:Metal
+    host: dbi:mysql:Metal
     user: dbuser
     password: dbpassword
 server:
