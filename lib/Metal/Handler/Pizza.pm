@@ -5,18 +5,20 @@ use Moose;
 
 extends 'Metal::Handler';
 
-with 'Metal::Roles::DB';
+with qw/
+    Metal::Roles::DB
+    Metal::Roles::User
+/;
 
 ################################################################################
 
 sub add_new_pizza {
     my $self = shift;
 
+    return unless $self->args->{from}->{is_identified};
+
+    my $user = $self->user_from_host($self->args->{from});
     my $output;
-    my $user = $self->_user_for_hostmask(
-        $self->args->{from}->{hostmask},
-        $self->args->{from}->{nick}
-    );
 
     my $pizza = $self->schema->resultset('Pizza')->create({
         user_id => $user->id,
@@ -75,7 +77,7 @@ sub help {
     my @rows = (
         'pizza++ (Add a new pizza)',
         'pizza-- (Remove your last pizza)',
-        'pizzahighscores (Highscores list)',
+        'pizzagods (Highscores list)',
         'pizzainfo (Show information about pizza counting)',
         'pizzahelp (Show this information)',
     );
@@ -105,11 +107,10 @@ sub legacy_count {
 sub remove_last_pizza {
     my $self = shift;
 
+    return unless $self->args->{from}->{is_identified};
+
     my $output;
-    my $user = $self->_user_for_hostmask(
-        $self->args->{from}->{hostmask},
-        $self->args->{from}->{nick}
-    );
+    my $user = $self->user_from_host($self->args->{from});
 
     my $pizza = $self->schema->resultset('Pizza')->search_rs({
         user_id => $user->id,
@@ -141,23 +142,6 @@ sub _user_pizza_count {
     return $self->schema->resultset('Pizza')->search_rs({
         user_id => $user->id
     })->count();
-}
-
-sub _user_for_hostmask {
-    my $self     = shift;
-    my $hostmask = shift;
-    my $nick     = shift;
-
-    my $user = $self->schema->resultset('User')->find_or_new({
-        hostmask => $hostmask
-    });
-
-    unless ($user->in_storage()) {
-        $user->name($nick);
-        $user->insert();
-    }
-
-    return $user;
 }
 
 ################################################################################

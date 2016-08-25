@@ -13,17 +13,16 @@ sub is_identified {
 
 sub user_from_host {
     my $self = shift;
-    my $host = shift;
-    my $nick = shift;
+    my $args = shift;
 
-    return unless $host;
+    return unless $args->{host};
 
     my $user = $self->schema->resultset('User')->find_or_new({
-        hostmask => $host,
+        hostmask => $args->{host},
     });
 
     unless ($user->in_storage()) {
-        $user->name($nick);
+        $user->name($args->{nick});
         $user->insert();
     }
 

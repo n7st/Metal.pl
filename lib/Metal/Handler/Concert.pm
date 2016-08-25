@@ -17,7 +17,7 @@ with qw/
 sub add_band {
     my $self = shift;
 
-    unless ($self->is_identified($self->args->{from}->{hostmask})) {
+    unless ($self->args->{from}->{is_identified}) {
         return "You are not an identified user.";
     }
 
@@ -32,10 +32,7 @@ sub add_band {
 
     return 'Usage: ;addband -n "Band Name" (-i "Extra Info Here")' unless $band_name;
 
-    my $user = $self->user_from_host(
-        $self->args->{from}->{hostmask},
-        $self->args->{from}->{nick}
-    );
+    my $user = $self->user_from_host($self->args->{from});
 
     my $band = $self->_band_from_name($band_name, $user);
 
@@ -70,10 +67,7 @@ sub add_festival {
 
     return 'Usage: ;addfestival -n "Festival Name" -d "2016-12-31"' unless $festival_name;
 
-    my $user = $self->user_from_host(
-        $self->args->{from}->{hostmask},
-        $self->args->{from}->{nick}
-    );
+    my $user = $self->user_from_host($self->args->{from});
 
     my $festival = $self->_festival_from_name($festival_name, $festival_date, $user);
 
@@ -91,6 +85,8 @@ sub add_festival {
 
 sub band_info {
     my $self = shift;
+
+    return unless $self->args->{list};
 
     my $band_name = join ' ', @{$self->args->{list}};
     my $band      = $self->schema->resultset('Band')->find({
@@ -121,9 +117,19 @@ sub band_info {
 sub user_band_total {
     my $self = shift;
 
-    my $user = $self->args->{list}->[0]
-        ? $self->schema->resultset('User')->find({ name => $self->args->{list}->[0] })
-        : $self->user_from_host($self->args->{from}->{hostmask});
+    my $user;
+
+    p $self->args;
+
+    if ($self->args->{list}->[0]) {
+        $user = $self->schema->resultset('User')->find({
+            name => $self->args->{list}->[0]
+        });
+    } elsif ($self->args->{from}->{is_identified}) {
+        $user = $self->user_from_host($self->{args}->{from});
+    } else {
+        return "You need to be an identified user to request your own stats.";
+    }
 
     my $count = $self->schema->resultset('UserBand')->search_rs({
         user_id => $user->id,

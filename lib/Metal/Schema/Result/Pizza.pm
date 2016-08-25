@@ -120,7 +120,7 @@ sub insert {
 
     my $now = DateTime->now();
 
-    unless ($self->result_source->schema->resultset('Pizza')->user_pizzas_today($self->user_id) > 5) {
+    unless ($self->result_source->schema->resultset('Pizza')->user_pizzas_today($self->user_id) > 2) {
         $self->date_created($now);
         $self->date_modified($now);
 
