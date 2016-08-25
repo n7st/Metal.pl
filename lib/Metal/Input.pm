@@ -69,7 +69,9 @@ sub irc_public {
     my $kernel  = shift;
     my $heap    = shift;
 
-    my $args = $self->args_as_hashref(@_);
+    my $args = $self->args_as_hashref('PUBLIC', @_);
+
+    return if $args->{from}->{nick} eq $self->config->{server}->{nickname};
 
     $self->_handle_command($kernel, $heap->{irc}, $args);
     $self->_message_log('PUBLIC', $args);
@@ -77,13 +79,15 @@ sub irc_public {
     return;
 }
 
-sub irc_private {
+sub irc_msg {
     my $self    = shift;
     my $session = shift;
     my $kernel  = shift;
     my $heap    = shift;
 
-    my $args = $self->args_as_hashref(@_);
+    my $args = $self->args_as_hashref('PRIVATE', @_);
+
+    return if $args->{from}->{nick} eq $self->config->{server}->{nickname};
 
     $self->_handle_command($kernel, $heap->{irc}, $args);
     $self->_message_log('PRIVATE', $args);
@@ -97,7 +101,9 @@ sub irc_notice {
     my $kernel  = shift;
     my $heap    = shift;
 
-    my $args = $self->args_as_hashref(@_);
+    my $args = $self->args_as_hashref('NOTICE', @_);
+
+    return if $args->{from}->{nick} eq $self->config->{server}->{nickname};
 
     $self->_message_log('NOTICE', $args);
 

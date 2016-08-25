@@ -8,6 +8,7 @@ with 'Metal::Roles::User';
 
 sub args_as_hashref {
     my $self = shift;
+    my $type = shift;
     my @args = @_; # List of POE::Component::IRC arguments
 
     my ($nick, $host)  = $self->split_nick_and_host($args[6]);
@@ -17,7 +18,7 @@ sub args_as_hashref {
     my @clean_arg_list = shift @arg_list;
 
     return {
-        input_location => $args[7][0],
+        input_location => $type eq 'PUBLIC' ? $args[7][0] : $nick,
         list           => \@arg_list,
         list_with_cmd  => \@clean_arg_list,
         original       => $args[8],

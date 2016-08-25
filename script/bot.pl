@@ -17,7 +17,15 @@ my $session = POE::Session->create(inline_states => {
         my $bot = POE::Component::IRC->spawn();
 
         POE::Session->create(package_states => [
-            $metal->input => [ qw/_start irc_001 irc_notice irc_public/ ],
+            $metal->input => [
+                qw/
+                    _start
+                    irc_001
+                    irc_notice
+                    irc_public
+                    irc_msg
+                /
+            ],
         ], heap => {
             irc => $bot,
         });
