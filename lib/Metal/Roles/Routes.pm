@@ -86,7 +86,7 @@ sub _build_routes {
             class   => $self->PIZZA,
             routine => 'remove_last_pizza',
         },
-        'pizzahighscores' => {
+        'pizzagods' => {
             class   => $self->PIZZA,
             routine => 'highscores',
         },
