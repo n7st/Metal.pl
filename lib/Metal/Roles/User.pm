@@ -15,10 +15,10 @@ sub user_from_host {
     my $self = shift;
     my $args = shift;
 
-    return unless $args->{host};
+    return unless $args->{hostmask};
 
     my $user = $self->schema->resultset('User')->find_or_new({
-        hostmask => $args->{host},
+        hostmask => $args->{hostmask},
     });
 
     unless ($user->in_storage()) {
