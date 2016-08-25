@@ -86,7 +86,7 @@ sub add_festival {
 sub band_info {
     my $self = shift;
 
-    return unless $self->args->{list};
+    return unless $self->args->{list}->[0];
 
     my $band_name = join ' ', @{$self->args->{list}};
     my $band      = $self->schema->resultset('Band')->find({
