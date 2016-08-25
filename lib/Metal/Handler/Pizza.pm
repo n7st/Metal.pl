@@ -96,6 +96,12 @@ sub info {
     return $output;
 }
 
+sub legacy_count {
+    my $self = shift;
+
+    return "Between 2015-04-28 and 2016-07-25, #metal ate 1552 pizzas.";
+}
+
 sub remove_last_pizza {
     my $self = shift;
 

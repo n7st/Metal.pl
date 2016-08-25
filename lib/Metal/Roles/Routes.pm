@@ -98,6 +98,10 @@ sub _build_routes {
             class   => $self->PIZZA,
             routine => 'help',
         },
+        'legacypizza' => {
+            class   => $self->PIZZA,
+            routine => 'legacy_count',
+        },
 
         # Metal::Handler::Releases
         'releases' => {
