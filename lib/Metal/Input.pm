@@ -28,7 +28,7 @@ sub _start {
     $kernel->post($bot => register => 'all');
 
     $kernel->post($bot => connect => {
-        Ircname  => $self->config->{server}->{ircname},
+        Ircname  => $self->config->{server}->{realname},
         Nick     => $self->config->{server}->{nickname},
         Port     => $self->config->{server}->{port},
         Server   => $self->config->{server}->{host},
@@ -47,6 +47,14 @@ sub irc_001 {
     my $heap    = shift;
 
     my $bot = $heap->{irc};
+
+    if ($self->config->{server}->{ns_password}) {
+        $kernel->post($bot => privmsg => 'nickserv' => sprintf(
+                "identify %s",
+                $self->config->{server}->{ns_password},
+            )
+        );
+    }
 
     foreach (@{$self->config->{channels}}) {
         $kernel->post($bot => join => $_);
