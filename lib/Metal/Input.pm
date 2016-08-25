@@ -85,6 +85,7 @@ sub irc_private {
 
     my $args = $self->args_as_hashref(@_);
 
+    $self->_handle_command($kernel, $heap->{irc}, $args);
     $self->_message_log('PRIVATE', $args);
 
     return;
