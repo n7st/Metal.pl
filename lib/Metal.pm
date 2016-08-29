@@ -4,7 +4,10 @@ use Moose;
 
 use Metal::Input;
 
-with 'Metal::Roles::Config';
+with qw/
+    Metal::Roles::DB
+    Metal::Roles::Config
+/;
 
 ################################################################################
 
