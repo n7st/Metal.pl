@@ -4,6 +4,7 @@ use Moose;
 use WWW::WolframAlpha;
 
 extends 'Metal::Handler';
+with    'Metal::Roles::Config';
 
 ################################################################################
 
@@ -16,9 +17,6 @@ sub query {
 
     my $query = $self->wa->query(input => join ', ', @{$self->args->{list}});
 
-    use DDP;
-
-    p $query;
     if ($query->success) {
         return $query->pods->[1]->subpods->[0]->plaintext;
     } else {
@@ -29,9 +27,7 @@ sub query {
 ################################################################################
 
 sub _build_wa {
-    my $self = shift;
-
-    return WWW::WolframAlpha->new(appid => 'X428HK-QEJK9Y52P2');
+    WWW::WolframAlpha->new(appid => shift->config->{keys}->{wolfram_alpha});
 }
 
 ################################################################################
