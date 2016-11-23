@@ -254,7 +254,7 @@ sub _top {
 
 ################################################################################
 
-sub _build_api_key { shift->config->{lastfm_api_key};     }
+sub _build_api_key { shift->config->{'keys'}->{lastfm};   }
 sub _build_api_url { 'http://ws.audioscrobbler.com/2.0/'; }
 
 sub _build_error_codes {

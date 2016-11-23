@@ -10,6 +10,8 @@ server:
     nickname: Metal___
 channels:
     - '##test'
-lastfm_api_key: 1234
+keys:
+    wolfram_alpha: 1234
+    lastfm: dflsdflsdf
 trigger: ';'
 
