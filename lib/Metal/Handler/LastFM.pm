@@ -124,11 +124,9 @@ sub album_scrobble_count {
     my $self = shift;
     my $ircu = shift;
 
-    unless ($ircu->lastfm) {
-        return $self->error_codes->{no_user};
-    }
+    return $self->error_codes->{no_user} unless $ircu->lastfm;
 
-    my ($artist, $album) = $self->args->{string} =~ /^([\w\s]+) "([\w\s]+)"$/;
+    my ($artist, $album) = $self->args->{string} =~ /^(.+) "(.+)"$/;
 
     unless ($artist && $album) {
         return 'Format: aplays artist name "album name"';
@@ -143,6 +141,7 @@ sub album_scrobble_count {
 
     return $resp->{message} if $resp->{error};
 
+    # Artist and album stats are formed differently
     my $stats          = $resp->{album};
     my $user_playcount = $stats->{userplaycount};
     my $playcount      = $stats->{playcount};
@@ -162,7 +161,29 @@ sub artist_scrobble_count {
     my $self = shift;
     my $ircu = shift;
 
-    return '';
+    return $self->error_codes->{no_user}  unless $ircu->lastfm;
+    return "You must provide a band name" unless $self->args->{string};
+
+    my $resp = $self->_get_query('artist.getInfo', {
+        artist      => $self->args->{string},
+        user        => $ircu->lastfm,
+        autocorrect => 1,
+    });
+
+    return $resp->{message} if $resp->{error};
+
+    # Artist and album stats are formed differently
+    my $user_playcount = $resp->{artist}->{stats}->{userplaycount};
+    my $playcount      = $resp->{artist}->{stats}->{playcount};
+    my $percentage     = $self->percentage($user_playcount, $playcount);
+
+    return sprintf("%s have %d total plays, of which %d are %s's (%s%%).",
+        $resp->{artist}->{name},
+        $playcount,
+        $user_playcount,
+        $ircu->lastfm,
+        $percentage,
+    );
 }
 
 sub top_all   { shift->_top('overall'); }
@@ -201,10 +222,6 @@ sub _top {
     my $user = $self->args->{list}->[0]
         ? $self->args->{list}->[0]
         : $ircu->lastfm;
-
-    unless ($user) {
-        return $self->error_codes->{no_user};
-    }
 
     my $resp = $self->_get_query('user.getTopArtists', {
         user   => $user,

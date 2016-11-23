@@ -106,6 +106,10 @@ sub _build_routes {
             class   => $self->LASTFM,
             routine => 'album_scrobble_count',
         },
+        'plays' => {
+            class   => $self->LASTFM,
+            routine => 'artist_scrobble_count',
+        },
         'topa' => {
             class   => $self->LASTFM,
             routine => 'top_all',
