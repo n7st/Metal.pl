@@ -130,9 +130,6 @@ sub album_scrobble_count {
 
     my ($artist, $album) = $self->args->{string} =~ /^([\w\s]+) "([\w\s]+)"$/;
 
-    p $artist;
-    p $album;
-
     unless ($artist && $album) {
         return 'Format: aplays artist name "album name"';
     }
