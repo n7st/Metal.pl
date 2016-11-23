@@ -57,6 +57,8 @@ sub irc_001 {
         );
     }
 
+    sleep 5;
+
     foreach (@{$self->config->{channels}}) {
         $kernel->post($bot => join => $_);
     }

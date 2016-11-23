@@ -22,3 +22,4 @@ data/config.yml
 *.swp
 *.sw0
 *.swo
+data/cache/*.json

@@ -7,6 +7,7 @@ use Metal::Handler::LastFM;
 use Metal::Handler::Pizza;
 use Metal::Handler::Releases;
 use Metal::Handler::Text;
+use Metal::Handler::WolframAlpha;
 
 ################################################################################
 
@@ -18,6 +19,7 @@ use constant {
     LASTFM   => 'Metal::Handler::LastFM',
     PIZZA    => 'Metal::Handler::Pizza',
     RELEASES => 'Metal::Handler::Releases',
+    WA       => 'Metal::Handler::WolframAlpha',
 };
 
 ################################################################################
@@ -151,6 +153,11 @@ sub _build_routes {
         'releases' => {
             class   => $self->RELEASES,
             routine => 'today',
+        },
+
+        'wa' => {
+            class   => $self->WA,
+            routine => 'query',
         },
     };
 }
