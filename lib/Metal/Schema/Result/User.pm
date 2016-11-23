@@ -54,6 +54,12 @@ __PACKAGE__->table("user");
   is_nullable: 0
   size: 45
 
+=head2 lastfm
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 20
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -80,6 +86,8 @@ __PACKAGE__->add_columns(
   },
   "name",
   { data_type => "varchar", is_nullable => 0, size => 45 },
+  "lastfm",
+  { data_type => "varchar", is_nullable => 1, size => 20 },
 );
 
 =head1 PRIMARY KEY
@@ -202,8 +210,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2016-08-24 17:52:21
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hcikdtsh5ymNBGHrOBlTGQ
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-11-22 18:00:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3nhfLq2fxUS0SJtp+H+8ww
 
 use DateTime;
 

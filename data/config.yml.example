@@ -1,13 +1,15 @@
 database:
-    host: dbi:mysql:Metal
+    host: dbi:mysql:host=host.name.com:dbname=Metal
     user: dbuser
-    password: dbpassword
+    password: password
 server:
     host: irc.snoonet.org
     port: 6667
     ident: Metal
     realname: Metal, Perl IRC bot
-    nickname: Metal_
+    nickname: Metal___
 channels:
     - '##test'
+lastfm_api_key: 1234
+trigger: ';'
 

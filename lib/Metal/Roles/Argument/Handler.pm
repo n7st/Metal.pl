@@ -14,21 +14,22 @@ sub args_as_hashref {
     my ($nick, $host)  = $self->split_nick_and_host($args[6]);
     my ($ident, $mask) = $self->split_ident_and_mask($host);
 
-    my @arg_list =       $self->_argument_list($args[8]);
+    my @arg_list       = $self->_argument_list($args[8]);
     my @clean_arg_list = shift @arg_list;
 
     return {
         input_location => $type eq 'PUBLIC' ? $args[7][0] : $nick,
-        list           => \@arg_list,
-        list_with_cmd  => \@clean_arg_list,
+        list           => \@arg_list       || [],
+        list_with_cmd  => \@clean_arg_list || [],
         original       => $args[8],
+        string         => join(' ', @arg_list),
 
         from => {
             host          => $host,
             hostmask      => $mask,
             ident         => $ident,
             nick          => $nick,
-            is_identified => $self->is_identified($mask),
+            is_identified => $self->is_identified($mask) ? 1 : 0,
         },
     };
 }

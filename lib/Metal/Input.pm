@@ -1,6 +1,7 @@
 package Metal::Input;
 
 use Data::Printer;
+use Encode;
 use Moose;
 
 extends 'Metal';
@@ -153,6 +154,10 @@ sub _handle_command {
 
         $output = $class->$routine();
     }
+
+    # $output already seems to be a utf8 string when it reaches here but when
+    # posted through $kernel the strings are broken - FIXME
+    $output = decode_utf8($output);
 
     if ($output) {
         $kernel->post($bot => privmsg => $args->{input_location} => $output);

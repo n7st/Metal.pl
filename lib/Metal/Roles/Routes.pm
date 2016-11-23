@@ -3,6 +3,7 @@ package Metal::Roles::Routes;
 use Moose::Role;
 
 use Metal::Handler::Concert;
+use Metal::Handler::LastFM;
 use Metal::Handler::Pizza;
 use Metal::Handler::Releases;
 use Metal::Handler::Text;
@@ -14,6 +15,7 @@ has routes => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 use constant {
     BASIC    => 'Metal::Handler::Text',
     CONCERT  => 'Metal::Handler::Concert',
+    LASTFM   => 'Metal::Handler::LastFM',
     PIZZA    => 'Metal::Handler::Pizza',
     RELEASES => 'Metal::Handler::Releases',
 };
@@ -75,6 +77,48 @@ sub _build_routes {
         'usershows' => {
             class   => $self->CONCERT,
             routine => 'user_band_total',
+        },
+
+        # Metal::Handler::LastFM
+        'setuser' => {
+            class   => $self->LASTFM,
+            routine => 'add_user',
+        },
+        'l' => {
+            class   => $self->LASTFM,
+            routine => 'now_playing',
+        },
+        'np' => {
+            class   => $self->LASTFM,
+            routine => 'now_playing',
+        },
+        'artist' => {
+            class   => $self->LASTFM,
+            routine => 'artist_info',
+        },
+        'band' => {
+            class   => $self->LASTFM,
+            routine => 'artist_info',
+        },
+        'aplays' => {
+            class   => $self->LASTFM,
+            routine => 'album_scrobble_count',
+        },
+        'topa' => {
+            class   => $self->LASTFM,
+            routine => 'top_all',
+        },
+        'topw' => {
+            class   => $self->LASTFM,
+            routine => 'top_week',
+        },
+        'topm' => {
+            class   => $self->LASTFM,
+            routine => 'top_month',
+        },
+        'topy' => {
+            class   => $self->LASTFM,
+            routine => 'top_year',
         },
 
         # Metal::Handler::Pizza

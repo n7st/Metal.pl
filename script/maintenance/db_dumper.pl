@@ -18,7 +18,7 @@ make_schema_at('Metal::Schema', {
     debug          => 1,
     dump_directory => './lib',
 }, [
-    'dbi:mysql:dbname=Metal',
+    'dbi:mysql:host=db01.host1.lab.netsplit.uk:dbname=Metal',
     $username,
     $password,
 ]);

@@ -10,6 +10,8 @@ use lib 'lib';
 
 use Metal;
 
+################################################################################
+
 my $metal = Metal->new();
 
 my $session = POE::Session->create(inline_states => {
@@ -31,6 +33,8 @@ my $session = POE::Session->create(inline_states => {
         });
     },
 });
+
+################################################################################
 
 POE::Kernel->run();
 __END__
