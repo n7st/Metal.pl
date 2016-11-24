@@ -25,18 +25,20 @@ sub _start {
     my $heap    = shift;
 
     my $bot      = $heap->{irc};
-    my $password = $self->config->{server}->{server_password};
+    my $s_config = $self->config->{server};
+    my $password = $s_config->{server_password};
 
     $kernel->post($bot => register => 'all');
 
-
     $kernel->post($bot => connect => {
-        Ircname  => $self->config->{server}->{realname},
-        Nick     => $self->config->{server}->{nickname},
-        Port     => $self->config->{server}->{port},
-        Server   => $self->config->{server}->{host},
-        Username => $self->config->{server}->{ident},
+        Ircname  => $s_config->{realname},
+        Nick     => $s_config->{nickname},
+        Port     => $s_config->{port},
+        Server   => $s_config->{host},
+        Username => $s_config->{ident},
         Password => $password,
+        UseSSL   => $s_config->{ssl} // 0,
+        debug    => $s_config->{debug} // 0,
     });
 
     print STDOUT "[SYSTEM] Connected\n";

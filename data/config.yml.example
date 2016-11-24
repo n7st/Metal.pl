@@ -8,6 +8,9 @@ server:
     ident: Metal
     realname: Metal, Perl IRC bot
     nickname: Metal___
+    #password: SomeBNCUser:Password
+    ssl: 0
+    debug: 0
 channels:
     - '##test'
 keys:
