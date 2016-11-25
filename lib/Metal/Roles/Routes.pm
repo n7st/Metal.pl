@@ -126,6 +126,10 @@ sub _build_routes {
             class   => $self->LASTFM,
             routine => 'top_year',
         },
+        'userinfo' => {
+            class   => $self->LASTFM,
+            routine => 'user_info',
+        },
 
         # Metal::Handler::Pizza
         'pizza++' => {

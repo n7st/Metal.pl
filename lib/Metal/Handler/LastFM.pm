@@ -1,6 +1,7 @@
 package Metal::Handler::LastFM;
 
 use Data::Printer;
+use DateTime;
 use JSON;
 use LWP::Simple qw/get/;
 use Math::Round;
@@ -30,6 +31,7 @@ around qw/
     album_scrobble_count
     artist_scrobble_count
     now_playing
+    user_info
 / => sub {
     my $orig = shift;
     my $self = shift;
@@ -80,16 +82,24 @@ sub now_playing {
         extended => 1,
     });
 
-    my $track  = $resp->{recenttracks}->{track}->[0];
-    my $album  = $track->{album}->{'#text'};
-    my $title  = $track->{name};
-    my $artist = $track->{artist}->{name};
+    my $track    = $resp->{recenttracks}->{track}->[0];
+    my $attr     = $track && $resp->{recenttracks}->{'@attr'};
+    my $album    = $track && $track->{album}->{'#text'};
+    my $title    = $track && $track->{name};
+    my $artist   = $track && $track->{artist}->{name};
+    my $scrobble = $attr  && $attr->{total};
 
-    my $np = $track->{'@attr'} && $track->{'@attr'}->{nowplaying}
+    my $np = $attr && $attr->{nowplaying}
         ? 'is now playing'
         : 'last played';
 
-    return sprintf("%s %s: %s/%s (%s)", $user, $np, $artist, $title, $album);
+    return sprintf("%s %s: %s/%s (%s)",
+        $user,
+        $np,
+        $artist,
+        $title,
+        $album,
+    );
 }
 
 sub artist_info {
@@ -118,7 +128,36 @@ sub artist_info {
     );
 }
 
-sub user_info {}
+sub user_info {
+    my $self = shift;
+    my $ircu = shift;
+
+    my $user = $self->args->{list}->[0]
+        ? $self->args->{list}->[0]
+        : $ircu->lastfm;
+
+    unless ($user) {
+        return $self->error_codes->{no_user};
+    }
+
+    my $resp = $self->_get_query('user.getInfo', {
+        user => $user,
+    });
+
+    return $resp->{message} if $resp->{error};
+
+    my $info       = $resp->{user};
+    my $registered = DateTime->from_epoch(epoch => $info->{registered}->{unixtime});
+
+    return sprintf("(%s/%s) Location: %s | Type: %s | Registered: %s | Scrobbles: %d",
+        $info->{realname} || 'Unknown',
+        $info->{name},
+        $info->{country} || 'Unknown',
+        ucfirst($info->{type}),
+        $registered->ymd,
+        $info->{playcount} || 0,
+    );
+}
 
 sub album_scrobble_count {
     my $self = shift;
