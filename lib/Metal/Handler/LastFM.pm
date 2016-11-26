@@ -72,9 +72,7 @@ sub now_playing {
         ? $self->args->{list}->[0]
         : $ircu->lastfm;
 
-    unless ($user) {
-        return $self->error_codes->{no_user};
-    }
+    return $self->error_codes->{no_user} unless $user;
 
     my $resp = $self->_get_query('user.getRecentTracks', {
         user     => $user,
@@ -82,49 +80,41 @@ sub now_playing {
         extended => 1,
     });
 
-    my $track    = $resp->{recenttracks}->{track}->[0];
-    my $attr     = $track && $resp->{recenttracks}->{'@attr'};
-    my $album    = $track && $track->{album}->{'#text'};
-    my $title    = $track && $track->{name};
-    my $artist   = $track && $track->{artist}->{name};
-    my $scrobble = $attr  && $attr->{total};
+    my $track       = $resp->{recenttracks}->{track}->[0];
+    my $attr        = $track && $resp->{recenttracks}->{'@attr'};
+    my $album       = $track && $track->{album}->{'#text'};
+    my $title       = $track && $track->{name};
+    my $artist      = $track && $track->{artist}->{name};
+    my $scrobble    = $attr  && $attr->{total};
+    my $artist_info = $self->_artist_data($artist);
+    my $track_info  = $self->_track_data($artist, $title, $user);
 
-    my $np = $attr && $attr->{nowplaying}
-        ? 'is now playing'
-        : 'last played';
+    my $np = $attr && $attr->{nowplaying} ? 'is now playing' : 'last played';
 
-    return sprintf("%s %s: %s/%s (%s)",
+    return sprintf("%s %s: %s/%s (%s) [%dx] (%s)",
         $user,
         $np,
         $artist,
         $title,
         $album,
+        $track_info->{playcount},
+        $artist_info->{tags},
     );
 }
 
 sub artist_info {
     my $self = shift;
 
-    my $resp = $self->_get_query('artist.getInfo', {
-        artist      => $self->args->{string},
-        autocorrect => 1,
-    });
+    my $resp = $self->_artist_data($self->args->{string});
 
     return $resp->{message} if $resp->{error};
 
-    my $artist  = $resp->{artist};
-    my $stats   = $artist->{stats};
-    my (@similar_artists, @related_tags);
-
-    push @similar_artists, $_->{name} foreach @{$artist->{similar}->{artist}};
-    push @related_tags,    $_->{name} foreach @{$artist->{tags}->{tag}};
-
     return sprintf("%s have %d plays and %d listeners. Similar artists: %s. Tags: %s.",
-        $artist->{name},
-        $stats->{playcount},
-        $stats->{listeners},
-        join(', ', @similar_artists) || '(none)',
-        join(', ', @related_tags)    || '(none)',
+        $resp->{name},
+        $resp->{playcount},
+        $resp->{listeners},
+        $resp->{similar},
+        $resp->{tags},
     );
 }
 
@@ -136,13 +126,9 @@ sub user_info {
         ? $self->args->{list}->[0]
         : $ircu->lastfm;
 
-    unless ($user) {
-        return $self->error_codes->{no_user};
-    }
+    return $self->error_codes->{no_user} unless $user;
 
-    my $resp = $self->_get_query('user.getInfo', {
-        user => $user,
-    });
+    my $resp = $self->_get_query('user.getInfo', { user => $user });
 
     return $resp->{message} if $resp->{error};
 
@@ -232,6 +218,36 @@ sub top_year  { shift->_top('12month'); }
 
 ################################################################################
 
+sub _artist_data {
+    my $self = shift;
+    my $name = shift;
+
+    my $resp = $self->_get_query('artist.getInfo', {
+        artist      => $name,
+        autocorrect => 1,
+    });
+
+    return {
+        error   => $resp->{error},
+        message => $resp->{message},
+    } if $resp->{error};
+
+    my $artist = $resp->{artist};
+    my $stats  = $artist && $artist->{stats};
+    my (@similar, @tags);
+
+    push @similar, $_->{name} foreach @{$artist->{similar}->{artist}};
+    push @tags,    $_->{name} foreach @{$artist->{tags}->{tag}};
+
+    return {
+        listeners => $stats->{listeners},
+        name      => $artist->{name},
+        playcount => $stats->{playcount},
+        similar   => join(', ', @similar) || '(none)',
+        tags      => join(', ', @tags)    || '(none)',
+    };
+}
+
 sub _get_query {
     my $self     = shift;
     my $endpoint = shift;
@@ -289,6 +305,25 @@ sub _top {
         $periods{$period},
         join(', ', @artists),
     );
+}
+
+sub _track_data {
+    my $self   = shift;
+    my $artist = shift;
+    my $title  = shift;
+    my $user   = shift;
+
+    my $params = {
+        artist => $artist,
+        track  => $title,
+    };
+
+    $params->{user} = $user if $user;
+
+    my $resp  = $self->_get_query('track.getInfo', $params);
+    my $track = $resp->{track};
+
+    return { playcount => $track->{playcount} || 0 };
 }
 
 ################################################################################
