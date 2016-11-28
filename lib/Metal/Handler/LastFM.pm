@@ -97,7 +97,7 @@ sub now_playing {
         $artist,
         $title,
         $album,
-        $track_info->{playcount},
+        $track_info->{user_playcount},
         $artist_info->{tags},
     );
 }
@@ -323,7 +323,10 @@ sub _track_data {
     my $resp  = $self->_get_query('track.getInfo', $params);
     my $track = $resp->{track};
 
-    return { playcount => $track->{playcount} || 0 };
+    return {
+        playcount      => $track->{playcount}     || 0,
+        user_playcount => $track->{userplaycount} || 0,
+    };
 }
 
 ################################################################################
