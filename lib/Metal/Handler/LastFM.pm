@@ -81,15 +81,16 @@ sub now_playing {
     });
 
     my $track       = $resp->{recenttracks}->{track}->[0];
-    my $attr        = $track && $resp->{recenttracks}->{'@attr'};
+    my $attr        = $track && $track->{'@attr'};
     my $album       = $track && $track->{album}->{'#text'};
     my $title       = $track && $track->{name};
     my $artist      = $track && $track->{artist}->{name};
-    my $scrobble    = $attr  && $attr->{total};
     my $artist_info = $self->_artist_data($artist);
     my $track_info  = $self->_track_data($artist, $title, $user);
 
     my $np = $attr && $attr->{nowplaying} ? 'is now playing' : 'last played';
+
+    use DDP; p $attr;
 
     return sprintf("%s %s: %s/%s (%s) [%dx] (%s)",
         $user,
