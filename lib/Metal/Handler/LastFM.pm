@@ -36,9 +36,13 @@ around qw/
     my $orig = shift;
     my $self = shift;
 
-    my $current_user = $self->user_from_host($self->{args}->{from});
+    my $user = $self->db->resultset('User')->from_host($self->{args}->{from});
 
-    return $self->$orig(@_, $current_user);
+    unless ($user) {
+        return "You need to set your Last.fm user (use setuser <username>).";
+    }
+
+    return $self->$orig(@_, $user);
 };
 
 ################################################################################
@@ -89,8 +93,6 @@ sub now_playing {
     my $track_info  = $self->_track_data($artist, $title, $user);
 
     my $np = $attr && $attr->{nowplaying} ? 'is now playing' : 'last played';
-
-    use DDP; p $attr;
 
     return sprintf("%s %s: %s/%s (%s) [%dx] (%s)",
         $user,
