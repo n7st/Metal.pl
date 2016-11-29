@@ -11,24 +11,6 @@ sub is_identified {
     return $host =~ /\//;
 }
 
-sub user_from_host {
-    my $self = shift;
-    my $args = shift;
-
-    return unless $args->{hostmask};
-
-    my $user = $self->schema->resultset('User')->find_or_new({
-        hostmask => $args->{hostmask},
-    });
-
-    unless ($user->in_storage()) {
-        $user->name($args->{nick});
-        $user->insert();
-    }
-
-    return $user;
-}
-
 sub split_ident_and_mask {
     my $self   = shift;
     my $string = shift;

@@ -3,6 +3,7 @@ package Metal::Roles::Routes;
 use Moose::Role;
 
 use Metal::Handler::Concert;
+use Metal::Handler::Event;
 use Metal::Handler::LastFM;
 use Metal::Handler::Pizza;
 use Metal::Handler::Releases;
@@ -16,6 +17,7 @@ has routes => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 use constant {
     BASIC    => 'Metal::Handler::Text',
     CONCERT  => 'Metal::Handler::Concert',
+    EVENT    => 'Metal::Handler::Event',
     LASTFM   => 'Metal::Handler::LastFM',
     PIZZA    => 'Metal::Handler::Pizza',
     RELEASES => 'Metal::Handler::Releases',
@@ -79,6 +81,12 @@ sub _build_routes {
         'usershows' => {
             class   => $self->CONCERT,
             routine => 'user_band_total',
+        },
+
+        # Metal::Handler::Event
+        'addevent' => {
+            class   => $self->EVENT,
+            routine => 'create',
         },
 
         # Metal::Handler::LastFM
@@ -155,6 +163,10 @@ sub _build_routes {
         'legacypizza' => {
             class   => $self->PIZZA,
             routine => 'legacy_count',
+        },
+        'mypizzascore' => {
+            class   => $self->PIZZA,
+            routine => 'user_stats',
         },
 
         # Metal::Handler::Releases

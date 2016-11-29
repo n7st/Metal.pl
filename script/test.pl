@@ -6,21 +6,25 @@ use Data::Printer;
 
 use lib 'lib';
 
-use Metal;
+#use Metal;
+#
+#my $metal = Metal->new({
+#    config => {
+#        server => {
+#            address => 'irc.snoonet.org',
+#            port    => 6667,
+#        },
+#    },
+#});
+#
+#print $metal->input->test_input('bandinfo', {
+#    hostmask    => 'snoonet/operations/Netsplit',
+#    nick        => 'Mike',
+#    band        => 'Immolation',
+#    description => 'Test',
+#});
 
-my $metal = Metal->new({
-    config => {
-        server => {
-            address => 'irc.snoonet.org',
-            port    => 6667,
-        },
-    },
-});
+use Metal::Web;
 
-print $metal->input->test_input('bandinfo', {
-    hostmask    => 'snoonet/operations/Netsplit',
-    nick        => 'Mike',
-    band        => 'Immolation',
-    description => 'Test',
-});
+my $pid = Metal::Web->new(8080);
 

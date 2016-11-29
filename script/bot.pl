@@ -3,10 +3,14 @@
 use strict;
 use warnings;
 
-use Data::Printer;
-use POE qw/Component::IRC Session/;
+use DDP;
+use FindBin;
+use POE qw/
+    Component::IRC
+    Session
+/;
 
-use lib 'lib';
+use lib "$FindBin::Bin/../lib";
 
 use Metal;
 
@@ -19,15 +23,13 @@ my $session = POE::Session->create(inline_states => {
         my $bot = POE::Component::IRC->spawn();
 
         POE::Session->create(package_states => [
-            $metal->input => [
-                qw/
-                    _start
-                    irc_001
-                    irc_notice
-                    irc_public
-                    irc_msg
-                /
-            ],
+            $metal->input => [ qw/
+                _start
+                irc_001
+                irc_notice
+                irc_public
+                irc_msg
+            / ],
         ], heap => {
             irc => $bot,
         });

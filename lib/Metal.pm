@@ -1,5 +1,7 @@
 package Metal;
 
+use Data::Printer;
+use HTTP::Status;
 use Moose;
 
 use Metal::Input;

@@ -32,7 +32,7 @@ sub add_band {
 
     return 'Usage: ;addband -n "Band Name" (-i "Extra Info Here")' unless $band_name;
 
-    my $user = $self->user_from_host($self->args->{from});
+    my $user = $self->db->resultset('User')->from_host($self->args->{from});
 
     my $band = $self->_band_from_name($band_name, $user);
 
@@ -67,7 +67,7 @@ sub add_festival {
 
     return 'Usage: ;addfestival -n "Festival Name" -d "2016-12-31"' unless $festival_name;
 
-    my $user = $self->user_from_host($self->args->{from});
+    my $user = $self->db->resultset('User')->from_host($self->args->{from});
 
     my $festival = $self->_festival_from_name($festival_name, $festival_date, $user);
 
@@ -119,14 +119,12 @@ sub user_band_total {
 
     my $user;
 
-    p $self->args;
-
     if ($self->args->{list}->[0]) {
         $user = $self->schema->resultset('User')->find({
             name => $self->args->{list}->[0]
         });
     } elsif ($self->args->{from}->{is_identified}) {
-        $user = $self->user_from_host($self->{args}->{from});
+        $user = $self->db->resultset('User')->from_host($self->{args}->{from});
     } else {
         return "You need to be an identified user to request your own stats.";
     }

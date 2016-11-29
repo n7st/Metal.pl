@@ -8,16 +8,28 @@ extends 'Metal::Handler';
 with qw/
     Metal::Roles::DB
     Metal::Roles::User
+    Metal::Roles::Math
 /;
+
+################################################################################
+
+around qw/add_new_pizza remove_last_pizza user_stats/ => sub {
+    my $orig = shift;
+    my $self = shift;
+
+    return unless $self->args->{from}->{is_identified};
+
+    my $user = $self->db->resultset('User')->from_host($self->args->{from});
+
+    return $self->$orig(@_, $user);
+};
 
 ################################################################################
 
 sub add_new_pizza {
     my $self = shift;
+    my $user = shift;
 
-    return unless $self->args->{from}->{is_identified};
-
-    my $user = $self->user_from_host($self->args->{from});
     my $output;
 
     my $pizza = $self->schema->resultset('Pizza')->create({
@@ -25,8 +37,7 @@ sub add_new_pizza {
     });
 
     if ($pizza) {
-        $output = sprintf(
-            'New pizza added. (Your total: %d, overall: %d)',
+        $output = sprintf('New pizza added. (Your total: %d, overall: %d)',
             $self->_user_pizza_count($user),
             $self->_all_pizza_count(),
         );
@@ -35,6 +46,21 @@ sub add_new_pizza {
     }
 
     return $output;
+}
+
+sub user_stats {
+    my $self = shift;
+    my $user = shift;
+
+    my $user_score = $self->_user_pizza_count($user);
+    my $all_score  = $self->_all_pizza_count();
+
+    return sprintf("%s has eaten %d pizzas (All: %d | Percentage: %.2f%%)",
+        $user->name,
+        $user_score,
+        $all_score,
+        $self->percentage($user_score, $all_score),
+    );
 }
 
 sub highscores {
@@ -54,8 +80,7 @@ sub highscores {
 
     my $i = 1;
     while (my $p = $pizzas->next()) {
-        push @rows, sprintf(
-            '%d: %s (%d)',
+        push @rows, sprintf('%d: %s (%d)',
             $i,
             $p->user->name,
             $p->{_column_data}->{appearances}
@@ -80,6 +105,7 @@ sub help {
         'pizzagods (Highscores list)',
         'pizzainfo (Show information about pizza counting)',
         'pizzahelp (Show this information)',
+        'mypizzascore (Show your own score)',
     );
 
     $output .= join ', ', @rows;
@@ -90,8 +116,7 @@ sub help {
 sub info {
     my $self = shift;
 
-    my $output = sprintf(
-        "There are %d pizzas in the database.",
+    my $output = sprintf("There are %d pizzas in the database.",
         $self->_all_pizza_count(),
     );
 
@@ -99,25 +124,19 @@ sub info {
 }
 
 sub legacy_count {
-    my $self = shift;
-
     return "Between 2015-04-28 and 2016-07-25, #metal ate 1552 pizzas.";
 }
 
 sub remove_last_pizza {
     my $self = shift;
-
-    return unless $self->args->{from}->{is_identified};
+    my $user = shift;
 
     my $output;
-    my $user = $self->user_from_host($self->args->{from});
 
     my $pizza = $self->schema->resultset('Pizza')->search_rs({
         user_id => $user->id,
     }, {
-        order_by => {
-            -desc => 'me.id',
-        }
+        order_by => { -desc => 'me.id' }
     })->first();
 
     if ($pizza) {
