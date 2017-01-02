@@ -8,7 +8,8 @@ sub is_identified {
     my $self = shift;
     my $host = shift;
 
-    return $host =~ /\//;
+    # Temporary, users are not identified if they have no hostmask
+    return $host !~ /Snoonet-/;
 }
 
 sub split_ident_and_mask {
