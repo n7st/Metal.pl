@@ -317,8 +317,9 @@ sub _track_data {
     my $user   = shift;
 
     my $params = {
-        artist => $artist,
-        track  => $title,
+        artist      => $artist,
+        track       => $title,
+        autocorrect => 1,
     };
 
     $params->{user} = $user if $user;
