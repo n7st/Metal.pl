@@ -92,7 +92,7 @@ Instantiate handler classes and return a usable HashRef.
 
 Spawn bots and set their package states to Handler classes.
 
-=item C<Metal::Handler::Message>
+=item C<Metal::Handler::External::Message>
 
 Mapper class for message items spooled from the IRC network (public, private,
 notice...).
