@@ -67,8 +67,10 @@ sub _build_filename {
 sub _build_type_block {
     my $self = shift;
 
+    my $type = $self->type;
+
     if ($self->type) {
-        return "\n\nsub _build_type { '$self->type' }";
+        return "\n\nsub _build_type { '$type' }";
     }
 
     return '';
