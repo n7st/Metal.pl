@@ -3,55 +3,23 @@ package Metal;
 use Module::Pluggable search_path => [ 'Metal' ];
 use Moose;
 
-use Metal::Gateway;
+use Metal::Bot;
 
 with qw/
-    Metal::Role::Cache
     Metal::Role::Config
     Metal::Role::Logger
 /;
 
-our $VERSION = 0.01;
-
-################################################################################
-
-has handlers => (is => 'ro', isa => 'HashRef', lazy_build => 1);
+our $VERSION = 0.011;
 
 ################################################################################
 
 sub run {
     my $self = shift;
 
-    $self->clear_runlist(); # from the cache role
+    my $bot = Metal::Bot->new();
 
-    my $gw = Metal::Gateway->new({ handlers => $self->handlers });
-
-    return $gw->connect();
-}
-
-################################################################################
-
-sub _build_handlers {
-    my $self = shift;
-
-    my $enabled_handlers = $self->config->{handlers};
-    my %ret;
-
-    # Build a map of available event handlers (IRC numeric events or custom
-    # signals)
-    foreach my $name (keys %{$enabled_handlers}) {
-        my $class = 'Metal::Handler::'.$enabled_handlers->{$name};
-
-        $self->logger->info("Loading handler class: ".$class);
-
-        eval "require $class";
-
-        $self->logger->warn($@) if $@;
-        $ret{$name} = eval { $class->new() };
-        $self->logger->warn($@) if $@;
-    }
-
-    return \%ret;
+    return $bot->run();
 }
 
 ################################################################################
@@ -62,12 +30,20 @@ __END__
 
 =head1 NAME
 
-Metal - Modular IRC framework.
+Metal
 
-=head2 USAGE
+=head1 DESCRIPTION
+
+Main class for the framework. Provides access to a variety of functions from
+the command-line.
+
+=head2 SYNOPSIS
+
+    use Metal;
 
     my $metal = Metal->new();
 
+    # Run the bot
     $metal->run();
 
 =head2 METHODS
@@ -76,26 +52,7 @@ Metal - Modular IRC framework.
 
 =item C<run()>
 
-Connect to the gateway and run the main loop.
-
-=item C<_build_handlers()>
-
-Instantiate handler classes and return a usable HashRef.
-
-=back
-
-=head1 SEE ALSO
-
-=over 4
-
-=item C<Metal::Gateway>
-
-Spawn bots and set their package states to Handler classes.
-
-=item C<Metal::Handler::External::Message>
-
-Mapper class for message items spooled from the IRC network (public, private,
-notice...).
+Run IRC bots.
 
 =back
 
