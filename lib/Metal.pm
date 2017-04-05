@@ -1,9 +1,12 @@
 package Metal;
 
+# ABSTRACT: Metal IRC framework
+
 use Module::Pluggable search_path => [ 'Metal' ];
 use Moose;
 
 use Metal::Bot;
+use Metal::Handler::Creator;
 
 with qw/
     Metal::Role::Config
@@ -20,6 +23,21 @@ sub run {
     my $bot = Metal::Bot->new();
 
     return $bot->run();
+}
+
+sub new_handler {
+    my $self = shift;
+    my $args = shift;
+
+    unless ($args->{name}) {
+        $self->logger->warn("A `name` argument is required by Metal::Handler::Creator");
+
+        return 0;
+    }
+
+    my $gen = Metal::Handler::Creator->new($args);
+
+    return $gen->generate();
 }
 
 ################################################################################
