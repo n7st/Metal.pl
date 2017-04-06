@@ -10,14 +10,20 @@ use constant {
 
 ################################################################################
 
-has type => (is => 'ro', isa => 'Maybe[Str]');
+has type          => (is => 'ro', isa => 'Maybe[Str]');
+has events_string => (is => 'ro', isa => 'Maybe[Str]');
+
+has empty_events  => (is => 'ro', isa => 'Bool', default => 0);
 
 has name => (is => 'ro', isa => 'Str', required => 1);
 
-has directory  => (is => 'ro', isa => 'Str', lazy_build => 1);
-has filename   => (is => 'ro', isa => 'Str', lazy_build => 1);
-has template   => (is => 'ro', isa => 'Str', lazy_build => 1);
-has type_block => (is => 'ro', isa => 'Str', lazy_build => 1);
+has directory   => (is => 'ro', isa => 'Str',      lazy_build => 1);
+has events      => (is => 'ro', isa => 'ArrayRef', lazy_build => 1);
+has event_block => (is => 'ro', isa => 'Str',      lazy_build => 1);
+has event_hash  => (is => 'ro', isa => 'Str',      lazy_build => 1);
+has filename    => (is => 'ro', isa => 'Str',      lazy_build => 1);
+has template    => (is => 'ro', isa => 'Str',      lazy_build => 1);
+has type_block  => (is => 'ro', isa => 'Str',      lazy_build => 1);
 
 ################################################################################
 
@@ -55,6 +61,56 @@ sub _build_directory {
     return sprintf("%s%s", $self->BASE_DIR, join('/', @file_struct));
 }
 
+sub _build_event_block {
+    my $self = shift;
+
+    my $out = '';
+
+    foreach (@{$self->events}) {
+        $out .= <<"EVENT";
+
+sub $_ {
+    my \$self    = shift;
+    my \$session = shift;
+    my \$kernel  = shift;
+    my \$heap    = shift;
+
+    return 1;
+}
+EVENT
+    }
+
+    return $out;
+}
+
+sub _build_event_hash {
+    my $self = shift;
+
+    my $out = "return {\n";
+
+    foreach (@{$self->events}) {
+        $out .= <<"EVENT";
+        $_ => 1,
+EVENT
+    }
+
+    $out .= "    };";
+
+    return $out;
+}
+
+sub _build_events {
+    my $self = shift;
+
+    my @events = split /,\s?/, $self->events_string;
+
+    unless (@events && !$self->empty_events) {
+        push @events, "irc_999";
+    }
+
+    return \@events;
+}
+
 sub _build_filename {
     my $self = shift;
 
@@ -79,8 +135,10 @@ sub _build_type_block {
 sub _build_template {
     my $self = shift;
 
-    my $name       = $self->name;
-    my $type_block = $self->type_block;
+    my $name        = $self->name;
+    my $type_block  = $self->type_block;
+    my $event_block = $self->event_block;
+    my $event_hash  = $self->event_hash;
 
     my $template = <<"DEFAULT";
 package Metal::Handler::$name;
@@ -90,22 +148,12 @@ use Moose;
 extends 'Metal::Handler';
 
 ################################################################################
-
-sub irc_999 {
-    my \$self    = shift;
-    my \$session = shift;
-    my \$kernel  = shift;
-    my \$heap    = shift;
-
-    return 1;
-}
+$event_block
 
 ################################################################################
 
 sub _build_events {
-    return {
-        irc_999 => 1,
-    };
+    $event_hash
 }$type_block
 
 ################################################################################

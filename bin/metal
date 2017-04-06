@@ -22,6 +22,7 @@ Getopt::Long::GetOptions(
     # Options for a new Handler
     "type|t=s" => \$options{type},
     "name|n=s" => \$options{name},
+    "add|a=s"  => \$options{add},
 );
 
 if ($options{mode} && $options{mode} eq 'run') {
@@ -45,8 +46,9 @@ sub main {
         system("dzil listdeps | cpanm");
     } elsif ($options{mode} eq 'new_handler') {
         $metal->new_handler({
-            name => $options{name},
-            type => $options{type},
+            events_string => $options{add},
+            name          => $options{name},
+            type          => $options{type},
         });
     } else {
         print STDOUT "Metal was run but no options were called\n";
@@ -81,10 +83,13 @@ Run various tasks relating to the Metal IRC framework.
 
 =head1 SYNOPSIS
 
-    ./bin/metal -mode bootstrap                                 # install dependencies
-    ./bin/metal -mode test                                      # run unit tests
-    ./bin/metal -r                                              # run the bot
-    ./bin/metal -mode new_handler -name Internal::Some::Handler # create a new handler
+    ./bin/metal -mode bootstrap # install dependencies
+    ./bin/metal -mode test      # run unit tests
+    ./bin/metal -r              # run the bot
+
+    ./bin/metal -mode new_handler     \
+        -name Internal::Some::Handler \
+        -add "irc_999, irc_998"         # create a new handler to catch numeric 999 and 998
 
 =head1 AUTHOR
 

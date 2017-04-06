@@ -53,6 +53,15 @@ like($creator->template, qr/^package Metal::Handler::Second::Test;/,
     "Template 2 package line looks right",
 );
 
+ok($creator = Metal::Handler::Creator->new({
+    name          => 'Third::Test',
+    events_string => 'irc_996, irc_995',
+}), "Builder 3 ran");
+
+like($creator->event_hash, qr/^return \{\n\s{8}irc_996 => 1,\n\s{8}irc_995 => 1,\n\s{4}\};$/,
+    "Event hash string built as expected",
+);
+
 done_testing();
 __END__
 
