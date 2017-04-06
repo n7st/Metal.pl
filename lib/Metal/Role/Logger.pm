@@ -11,6 +11,17 @@ has logger => (is => 'ro', isa => 'Log::Log4perl::Logger', lazy_build => 1);
 
 ################################################################################
 
+sub logf {
+    my $self  = shift;
+    my $str   = shift;
+    my $args  = shift;
+    my $level = shift // 'info';
+
+    my $out = sprintf($str, @{$args});
+
+    return $self->logger->$level($out);
+}
+
 sub log_dump {
     my $self = shift;
     my $args = shift;
