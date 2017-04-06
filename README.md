@@ -7,10 +7,10 @@ POE::Component::IRC.
 
 ## Installation
 
-* `dzil authordeps | cpanm`
-* `dzil listdeps | cpanm`
+* `./bin/metal -mode test`
+* `./bin/metal -mode bootstrap`
 
 ## Running the bot
 
-* `./bin/metal`
+* `./bin/metal -run`
 
