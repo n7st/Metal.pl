@@ -32,7 +32,7 @@ $t->info("Test 6");
 $m->logf("%s", [ "Test 6" ]);
 $t->end("`logf` produced info output as expected (no log level was set)");
 
-# -> log_dump
+# ->log_dump
 @test_args = qw/foo bar/;
 $t->start();
 $t->info(Dumper(\@test_args));
