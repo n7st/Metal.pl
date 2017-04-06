@@ -2,13 +2,16 @@ package Metal;
 
 # ABSTRACT: Metal IRC framework
 
+use Data::Printer;
 use Module::Pluggable search_path => [ 'Metal' ];
 use Moose;
 
 use Metal::Bot;
 use Metal::Handler::Creator;
+use Metal::Wizard::Configuration;
 
 with qw/
+    Metal::Role::DB
     Metal::Role::Config
     Metal::Role::Logger
 /;
@@ -19,6 +22,14 @@ our $VERSION = 0.011;
 
 sub run {
     my $self = shift;
+
+    my @servers = $self->schema->resultset('Server')->all();
+
+    unless (scalar @servers) {
+        $self->logger->info("First run");
+
+        # ...
+    }
 
     my $bot = Metal::Bot->new();
 
@@ -38,6 +49,14 @@ sub new_handler {
     my $gen = Metal::Handler::Creator->new($args);
 
     return $gen->generate();
+}
+
+sub configure {
+    my $self = shift;
+
+    my $wizard = Metal::Wizard::Configuration->new();
+
+    return $wizard->walk();
 }
 
 ################################################################################
