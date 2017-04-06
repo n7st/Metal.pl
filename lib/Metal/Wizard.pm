@@ -14,7 +14,7 @@ sub walk {
     foreach (@{$self->steps}) {
         my $method = $_->{method};
 
-        $self->$method();
+        $self->$method($_->{args} // {});
     }
 
     return 1;

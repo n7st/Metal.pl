@@ -5,12 +5,21 @@ use Net::IP qw/ip_is_ipv4 ip_is_ipv6/;
 
 ################################################################################
 
+has channel_regex  => (is => 'ro', isa => 'Regexp', lazy_build => 1);
 has hostname_regex => (is => 'ro', isa => 'Regexp', lazy_build => 1);
 has ident_regex    => (is => 'ro', isa => 'Regexp', lazy_build => 1);
 has nickname_regex => (is => 'ro', isa => 'Regexp', lazy_build => 1);
 has port_regex     => (is => 'ro', isa => 'Regexp', lazy_build => 1);
 
 ################################################################################
+
+sub valid_channel {
+    my $self    = shift;
+    my $channel = shift;
+
+    return 0 unless $channel;
+    return $channel =~ $self->channel_regex;
+}
 
 sub valid_hostname_or_ip {
     my $self  = shift;
@@ -48,6 +57,10 @@ sub valid_port {
 }
 
 ################################################################################
+
+sub _build_channel_regex {
+    return qr/^\#+[a-z0-9\-_\.]+$/i;
+}
 
 sub _build_hostname_regex {
     return qr/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/i;
