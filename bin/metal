@@ -38,6 +38,8 @@ sub main {
 
     if ($options{run_bot}) {
         $metal->run();
+    } elsif ($options{mode} eq 'configure') {
+        $metal->configure();
     } elsif ($options{mode} eq 'test') {
         # TODO check dzil exists?
         system("dzil smoke -v");
