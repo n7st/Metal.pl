@@ -2,7 +2,6 @@ package Metal;
 
 # ABSTRACT: Metal IRC framework
 
-use Data::Printer;
 use Module::Pluggable search_path => [ 'Metal' ];
 use Moose;
 
@@ -11,9 +10,10 @@ use Metal::Handler::Creator;
 use Metal::Wizard::Configuration;
 
 with qw/
-    Metal::Role::DB
     Metal::Role::Config
+    Metal::Role::DB
     Metal::Role::Logger
+    Metal::Role::Validation::IRC
 /;
 
 our $VERSION = 0.011;
@@ -28,7 +28,7 @@ sub run {
     unless (scalar @servers) {
         $self->logger->info("First run");
 
-        # ...
+        # TODO run $self->configure()
     }
 
     my $bot = Metal::Bot->new();
