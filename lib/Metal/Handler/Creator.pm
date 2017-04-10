@@ -102,7 +102,11 @@ EVENT
 sub _build_events {
     my $self = shift;
 
-    my @events = split /,\s?/, $self->events_string;
+    my @events;
+
+    if ($self->events_string) {
+        @events = split /,\s?/, $self->events_string;
+    }
 
     unless (@events && !$self->empty_events) {
         push @events, "irc_999";
