@@ -45,10 +45,9 @@ is($server->id, 1, "Primary key is set");
 is($server->date_created, $now, "DateField helper produced correct date_created");
 is($server->date_modified, $now, "DateField helper produced correct date_modified");
 
-my $channel = $module->resultset('Channel')->new({
+my $channel = $server->new_related('channels', {
     id        => 1,
     name      => '##SomeChannel',
-    server_id => $server->id,
 
     date_created  => $now,
     date_modified => $now,
