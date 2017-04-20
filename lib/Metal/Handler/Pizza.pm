@@ -68,13 +68,17 @@ sub highscores {
 
     my @rows;
     my $output = "The top pizza eaters are: ";
+    my $limit  = $self->args->{list}->[0] // 5;
+
+    $limit = 15 if $limit > 15;
+
     my $pizzas = $self->schema->resultset('Pizza')->search_rs({}, {
         '+select' => [{
             ''  => \'COUNT(`me`.`user_id`)',
             -as => 'appearances',
         }],
         group_by => qw/user_id/,
-        rows     => 5,
+        rows     => $limit,
         order_by => 'appearances DESC',
     });
 
