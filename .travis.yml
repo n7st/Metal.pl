@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: perl
 perl:
    - '5.21'
@@ -13,8 +13,7 @@ branches:
 before_install:
    - git config --global user.name "TravisCI"
    - git config --global user.email $HOSTNAME":not-for-mail@travis-ci.org"
-   - sudo apt-get -qq update
-   - sudo apt-get install -y libcdb-file-perl libdb-file-lock-perl libmldbm-perl libtie-persistent-perl
+   - cpanm DBI DB_File
 install:
    - cpanm --quiet --notest Dist::Zilla
    - "dzil authordeps          --missing | grep -vP '[^\\w:]' | xargs -n 5 -P 10 cpanm --quiet --notest"
