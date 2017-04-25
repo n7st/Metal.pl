@@ -16,7 +16,7 @@ matrix:
 addons:
     apt:
         packages:
-            - libdb5.1
+            - libdb-dev
 fast_finish: true
 before_install:
     - git config --global user.name "TravisCI"
