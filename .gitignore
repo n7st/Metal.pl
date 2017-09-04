@@ -24,3 +24,4 @@ data/config.yml
 *.swo
 data/cache/*.json
 share/
+tmp/*
