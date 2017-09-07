@@ -8,7 +8,10 @@ use Reflex::POE::Session;
 use Reflex::Trait::Watched qw(watches);
 
 extends 'Reflex::Base';
-with 'Reflex::Role::Reactive';
+with    qw(
+    Metal::Role::Logger
+    Reflex::Role::Reactive
+);
 
 our $VERSION = 0.01;
 
@@ -17,7 +20,8 @@ our $VERSION = 0.01;
 has component => (is => 'rw', isa => 'POE::Component::IRC::State', lazy_build => 1);
 has trigger   => (is => 'ro', isa => 'Str',                        lazy_build => 1);
 
-has config => (is => 'ro', isa => 'HashRef',  required => 1);
+has config => (is => 'ro', isa => 'HashRef',       required => 1);
+has db     => (is => 'ro', isa => 'Metal::Schema', required => 1);
 
 has loaded_modules => (is => 'rw', isa => 'HashRef');
 
@@ -58,7 +62,10 @@ sub message_channel {
     # the module itself)
     return unless $message && $message ne '';
 
-    return $self->component->yield('privmsg' => $channel => $message);
+    eval { $self->component->yield('privmsg' => $channel => $message) };
+    $self->logger->warn($@) if $@;
+
+    return 1;
 }
 
 sub on_poco_irc_001 {

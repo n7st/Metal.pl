@@ -6,15 +6,17 @@ use Moose;
 
 use Metal::Integration::LastFM::Artist;
 use Metal::Integration::LastFM::Geo;
+use Metal::Integration::LastFM::User;
 
 extends 'Metal::Module';
 
 ################################################################################
 
 has api_key  => (is => 'ro', isa => 'Str',                                lazy_build => 1);
-has artist   => (is => 'ro', isa => 'Metal::Integration::LastFM::Artist', lazy_build => 1);
 has commands => (is => 'ro', isa => 'HashRef',                            lazy_build => 1);
+has artist   => (is => 'ro', isa => 'Metal::Integration::LastFM::Artist', lazy_build => 1);
 has geo      => (is => 'ro', isa => 'Metal::Integration::LastFM::Geo',    lazy_build => 1);
+has user     => (is => 'ro', isa => 'Metal::Integration::LastFM::User',   lazy_build => 1);
 
 ################################################################################
 
@@ -98,12 +100,79 @@ sub _geo_favourite {
     }
 }
 
+sub _now_playing {
+    my $self = shift;
+    my $args = shift;
+
+    my $user = $args->{message_args}->[0];
+
+    my $lastfm_username;
+
+    if ($args->{message_args}->[0]) {
+        $lastfm_username = $args->{message_args}->[0];
+    } else {
+        $lastfm_username = $self->bot->db->resultset('User')->search_rs({
+            hostmask => $args->{hostmask},
+        })->first->lastfm;
+    }
+
+    unless ($lastfm_username) {
+        my $trigger = $self->bot->config->{trigger};
+
+        return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
+    }
+
+    return $self->user->now_playing($lastfm_username)->{summary};
+}
+
+sub _set_user {
+    my $self = shift;
+    my $args = shift;
+
+    my $requested = $args->{message_args}->[0];
+    my $user      = $self->bot->db->resultset('User')->from_hostmask($args);
+    my $start     = 'Your Last.fm username was';
+
+    $user->lastfm($requested);
+    $user->update();
+
+    if ($requested) {
+        return sprintf(q[%s set as "%s"], $start, $user->lastfm);
+    } else {
+        return "${start} unset.";
+    }
+}
+
 ################################################################################
 
 sub _build_api_key {
     my $self = shift;
 
     return $self->bot->config->{lastfm}->{api_key};
+}
+
+sub _build_commands {
+    my $self = shift;
+
+    return {
+        # Artist
+        artist  => '_artist_info',
+        band    => '_artist_info',
+        similar => '_artist_similar',
+        tags    => '_artist_tags',
+
+        # Geo
+        geotop => '_geo_favourite',
+
+        # Album
+
+        # User
+        l          => '_now_playing',
+        nowplaying => '_now_playing',
+        np         => '_now_playing',
+        setuser    => '_set_user',
+        lastfm     => '_set_user',
+    };
 }
 
 sub _build_artist {
@@ -114,28 +183,18 @@ sub _build_artist {
     });
 }
 
-sub _build_commands {
-    my $self = shift;
-
-    return {
-        # Artist
-        artist  => '_artist_info',
-        similar => '_artist_similar',
-        tags    => '_artist_tags',
-
-        # Geo
-        geotop => '_geo_favourite',
-
-        # Album
-
-        # User
-    };
-}
-
 sub _build_geo {
     my $self = shift;
 
     return Metal::Integration::LastFM::Geo->new({
+        api_key => $self->api_key,
+    });
+}
+
+sub _build_user {
+    my $self = shift;
+
+    return Metal::Integration::LastFM::User->new({
         api_key => $self->api_key,
     });
 }

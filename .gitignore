@@ -25,3 +25,5 @@ data/config.yml
 data/cache/*.json
 share/
 tmp/*
+share/metal-schema/*
+share/metal-schema.db
