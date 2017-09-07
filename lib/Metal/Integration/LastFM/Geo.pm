@@ -1,6 +1,5 @@
 package Metal::Integration::LastFM::Geo;
 
-use Data::Printer;
 use Moose;
 
 extends 'Metal::Integration::LastFM';
