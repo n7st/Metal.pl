@@ -18,6 +18,36 @@ has artist   => (is => 'ro', isa => 'Metal::Integration::LastFM::Artist', lazy_b
 has geo      => (is => 'ro', isa => 'Metal::Integration::LastFM::Geo',    lazy_build => 1);
 has user     => (is => 'ro', isa => 'Metal::Integration::LastFM::User',   lazy_build => 1);
 
+around [ qw(_now_playing _top_all _top_month _top_week _top_year) ] => sub {
+    my $orig = shift;
+    my $self = shift;
+    my $args = shift;
+
+    # Get the current user's Last.fm name or one they've provided in the message
+
+    my $user = $args->{message_args}->[0];
+
+    my $lastfm_username;
+
+    if ($args->{message_args}->[0]) {
+        $lastfm_username = $args->{message_args}->[0];
+    } else {
+        $lastfm_username = $self->bot->db->resultset('User')->search_rs({
+            hostmask => $args->{hostmask},
+        })->first->lastfm;
+    }
+
+    unless ($lastfm_username) {
+        my $trigger = $self->bot->config->{trigger};
+
+        # If there's no name, instead return a message without continuing on
+        # to the important bit
+        return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
+    }
+
+    return $self->$orig($args, $lastfm_username);
+};
+
 ################################################################################
 
 sub on_bot_public {
@@ -101,26 +131,9 @@ sub _geo_favourite {
 }
 
 sub _now_playing {
-    my $self = shift;
-    my $args = shift;
-
-    my $user = $args->{message_args}->[0];
-
-    my $lastfm_username;
-
-    if ($args->{message_args}->[0]) {
-        $lastfm_username = $args->{message_args}->[0];
-    } else {
-        $lastfm_username = $self->bot->db->resultset('User')->search_rs({
-            hostmask => $args->{hostmask},
-        })->first->lastfm;
-    }
-
-    unless ($lastfm_username) {
-        my $trigger = $self->bot->config->{trigger};
-
-        return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
-    }
+    my $self            = shift;
+    my $args            = shift;
+    my $lastfm_username = shift;
 
     return $self->user->now_playing($lastfm_username)->{summary};
 }
@@ -141,6 +154,20 @@ sub _set_user {
     } else {
         return "${start} unset.";
     }
+}
+
+sub _top_all   { shift->_top('overall', @_) }
+sub _top_month { shift->_top('1month',  @_) }
+sub _top_week  { shift->_top('7day',    @_) }
+sub _top_year  { shift->_top('12month', @_) }
+
+sub _top {
+    my $self            = shift;
+    my $period          = shift;
+    my $args            = shift;
+    my $lastfm_username = shift;
+
+    return $self->user->top($lastfm_username, $period)->{summary}
 }
 
 ################################################################################
@@ -172,6 +199,10 @@ sub _build_commands {
         np         => '_now_playing',
         setuser    => '_set_user',
         lastfm     => '_set_user',
+        topw       => '_top_week',
+        topm       => '_top_month',
+        topy       => '_top_year',
+        topa       => '_top_all',
     };
 }
 

@@ -1,6 +1,5 @@
 package Metal;
 
-use DDP;
 use Moose;
 use utf8::all; # we're dealing with IRC so everything should be output in UTF-8
 

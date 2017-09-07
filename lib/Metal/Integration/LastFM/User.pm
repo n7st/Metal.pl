@@ -8,6 +8,10 @@ extends 'Metal::Integration::LastFM';
 
 ################################################################################
 
+has top_limit => (is => 'ro', isa => 'Int', default => 8);
+
+################################################################################
+
 sub now_playing {
     my $self = shift;
     my $user = shift;
@@ -55,6 +59,43 @@ sub now_playing {
         summary => $track_info->output,
         error   => 0,
         track   => $track_info,
+    };
+}
+
+sub top {
+    my $self   = shift;
+    my $user   = shift;
+    my $period = shift;
+
+    my $response = $self->_get_query('user.getTopArtists', {
+        username => $user,
+        period   => $period,
+        limit    => $self->top_limit,
+    });
+
+    return {
+        summary => $response->{message},
+        error   => $response->{error},
+    } if $response->{error};
+
+    my %periods = (
+        'overall' => 'all time',
+        '7day'    => 'the last week',
+        '1month'  => 'the last month',
+        '12month' => 'the last year',
+    );
+
+    my @artists = map {
+        sprintf('%s [%d]', $_->{name}, $_->{playcount})
+    } @{$response->{topartists}->{artist}};
+
+    return {
+        artists => \@artists,
+        summary => sprintf(q[%s's top artists for %s: %s],
+            $user,
+            $periods{$period},
+            join(', ', @artists) || 'none',
+        ),
     };
 }
 
