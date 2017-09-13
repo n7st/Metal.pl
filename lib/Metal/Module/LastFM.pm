@@ -18,6 +18,8 @@ has artist   => (is => 'ro', isa => 'Metal::Integration::LastFM::Artist', lazy_b
 has geo      => (is => 'ro', isa => 'Metal::Integration::LastFM::Geo',    lazy_build => 1);
 has user     => (is => 'ro', isa => 'Metal::Integration::LastFM::User',   lazy_build => 1);
 
+has err_no_user => (is => 'ro', isa => 'Str', lazy_build => 1);
+
 around [ qw(_now_playing _top_all _top_month _top_week _top_year) ] => sub {
     my $orig = shift;
     my $self = shift;
@@ -38,11 +40,27 @@ around [ qw(_now_playing _top_all _top_month _top_week _top_year) ] => sub {
     }
 
     unless ($lastfm_username) {
-        my $trigger = $self->bot->config->{trigger};
+        return $self->err_no_user;
+    }
 
-        # If there's no name, instead return a message without continuing on
-        # to the important bit
-        return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
+    return $self->$orig($args, $lastfm_username);
+};
+
+around [ qw(_album_plays _artist_plays) ] => sub {
+    my $orig = shift;
+    my $self = shift;
+    my $args = shift;
+
+    # Arguments for these methods are too complex to parse for a user string
+    # as well as an artist or album - only allow the current user to check their
+    # own 'plays'.
+
+    my $lastfm_username = $self->bot->db->resultset('User')->search_rs({
+        hostmask => $args->{hostmask},
+    })->first->lastfm;
+
+    unless ($lastfm_username) {
+        return $self->err_no_user;
     }
 
     return $self->$orig($args, $lastfm_username);
@@ -138,6 +156,32 @@ sub _now_playing {
     return $self->user->now_playing($lastfm_username)->{summary};
 }
 
+sub _album_plays {
+    my $self            = shift;
+    my $args            = shift;
+    my $lastfm_username = shift;
+
+    # This could be more robust
+    my ($artist, $album) = $args->{message_arg_str} =~ /^(.+) "(.+)"$/;
+
+    return 'You must provide a band and album name (format: band name "album name")'
+        unless $artist && $album;
+
+    return $self->user->album_plays($lastfm_username, $artist, $album)->{summary};
+}
+
+sub _artist_plays {
+    my $self            = shift;
+    my $args            = shift;
+    my $lastfm_username = shift;
+
+    my $artist = $args->{message_arg_str};
+
+    return 'You must provide a band name' unless $artist;
+
+    return $self->user->artist_plays($lastfm_username, $artist)->{summary};
+}
+
 sub _set_user {
     my $self = shift;
     my $args = shift;
@@ -191,7 +235,6 @@ sub _build_commands {
         # Geo
         geotop => '_geo_favourite',
 
-        # Album
 
         # User
         l          => '_now_playing',
@@ -203,6 +246,8 @@ sub _build_commands {
         topm       => '_top_month',
         topy       => '_top_year',
         topa       => '_top_all',
+        aplays     => '_album_plays',
+        plays      => '_artist_plays',
     };
 }
 
@@ -230,9 +275,18 @@ sub _build_user {
     });
 }
 
+sub _build_err_no_user {
+    my $self = shift;
+
+    my $trigger = $self->bot->config->{trigger};
+
+    return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
+}
+
 ################################################################################
 
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+__END__
 

@@ -1,6 +1,5 @@
 package Metal::Integration::LastFM::User::TrackInfo;
 
-use DDP;
 use Moose;
 
 ################################################################################

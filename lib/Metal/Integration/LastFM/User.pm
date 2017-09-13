@@ -5,12 +5,90 @@ use Moose;
 use Metal::Integration::LastFM::User::TrackInfo;
 
 extends 'Metal::Integration::LastFM';
+with    'Metal::Role::Maths';
 
 ################################################################################
 
 has top_limit => (is => 'ro', isa => 'Int', default => 8);
 
 ################################################################################
+
+sub album_plays {
+    my $self   = shift;
+    my $user   = shift;
+    my $artist = shift;
+    my $album  = shift;
+
+    my $response = $self->_get_query('album.getInfo', {
+        album       => $album,
+        artist      => $artist,
+        autocorrect => 1,
+        user        => $user,
+    });
+
+    return {
+        summary => $response->{message},
+        error   => $response->{error},
+    } if $response->{error};
+
+    my $info = $response->{album};
+    my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($info);
+
+    my $summary = sprintf("%s/%s has %d total plays, of which %d are %s's (%s%%).",
+        $info->{artist},
+        $info->{name},
+        $playcount,
+        $user_playcount,
+        $user,
+        $percentage,
+    );
+
+    return {
+        error      => 0,
+        summary    => $summary,
+        playcounts => {
+            user  => $user_playcount,
+            total => $playcount,
+        },
+    };
+}
+
+sub artist_plays {
+    my $self   = shift;
+    my $user   = shift;
+    my $artist = shift;
+
+    my $response = $self->_get_query('artist.getInfo', {
+        artist      => $artist,
+        user        => $user,
+        autocorrect => 1,
+    });
+
+    return {
+        summary => $response->{message},
+        error   => $response->{error},
+    } if $response->{error};
+
+    my $artist = $response->{artist};
+    my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($artist->{stats});
+
+    my $summary = sprintf("%s have %s total plays, of which %d are %s's (%s%%).",
+        $artist->{name},
+        $playcount,
+        $user_playcount,
+        $user,
+        $percentage,
+    );
+
+    return {
+        error      => 0,
+        summary    => $summary,
+        playcounts => {
+            user  => $user_playcount,
+            total => $playcount,
+        },
+    };
+}
 
 sub now_playing {
     my $self = shift;
@@ -97,6 +175,19 @@ sub top {
             join(', ', @artists) || 'none',
         ),
     };
+}
+
+################################################################################
+
+sub _get_playcount_data {
+    my $self = shift;
+    my $node = shift;
+
+    my $user_playcount = $node->{userplaycount};
+    my $playcount      = $node->{playcount};
+    my $percentage     = $self->percentage($user_playcount, $playcount);
+
+    return ($user_playcount, $playcount, $percentage);
 }
 
 ################################################################################
