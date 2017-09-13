@@ -28,7 +28,7 @@ sub meets_min_msg_length {
     my $self = shift;
     my $msg  = shift;
 
-    my $min_length = $self->config->{min_filter_len} // $self->default_min_filter_length;
+    my $min_length = $self->config->{min_filter_len} || $self->default_min_filter_length;
 
     return length($msg) >= $min_length;
 }
@@ -39,7 +39,7 @@ sub meets_min_msg_word_count {
 
     # Count the number of spaces in the message
     my $word_count     = () = $msg =~ m/\s/g;
-    my $min_word_count = $self->config->{min_word_count} // $self->default_min_word_count;
+    my $min_word_count = $self->config->{min_word_count} || $self->default_min_word_count;
 
     return $word_count >= $min_word_count;
 }
@@ -55,7 +55,7 @@ sub meets_msg_max_highlight_count {
 
     return 0 unless @nicknames;
 
-    my $highlight_limit = $self->config->{highlight_limit} // $self->default_highlight_limit;
+    my $highlight_limit = $self->config->{highlight_limit} || $self->default_highlight_limit;
     my %args = map { $_ => 1 } split / /, $msg;
     my %seen;
 
@@ -70,7 +70,7 @@ sub meets_msg_max_non_utf8_count {
     my $self = shift;
     my $msg  = shift;
 
-    my $limit = $self->config->{non_utf8_char_count} // $self->default_non_utf8_char_count;
+    my $limit = $self->config->{non_utf8_char_count} || $self->default_non_utf8_char_count;
     my $count = () = $msg =~ m/[^[:print:]]/g;
 
     return $count >= $limit;
