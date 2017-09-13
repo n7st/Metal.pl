@@ -43,5 +43,22 @@ __PACKAGE__->has_many('roles' => 'Metal::Schema::Result::UserRole', 'user_id');
 
 ################################################################################
 
+sub add_role {
+    my $self = shift;
+    my $name = shift;
+
+    my $role = $self->result_source->schema->resultset('Role')->search_rs({
+        name => $name,
+    })->first;
+
+    return unless $role;
+
+    return $self->create_related('roles', {
+        role_id => $role->id,
+    });
+}
+
+################################################################################
+
 1;
 

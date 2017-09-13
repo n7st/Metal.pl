@@ -69,11 +69,11 @@ sub artist_plays {
         error   => $response->{error},
     } if $response->{error};
 
-    my $artist = $response->{artist};
-    my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($artist->{stats});
+    my $info = $response->{artist};
+    my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($info->{stats});
 
     my $summary = sprintf("%s have %s total plays, of which %d are %s's (%s%%).",
-        $artist->{name},
+        $info->{name},
         $playcount,
         $user_playcount,
         $user,

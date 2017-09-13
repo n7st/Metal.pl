@@ -1,11 +1,15 @@
 package Metal;
 
 use Moose;
+use Term::ReadLine;
+use Term::UI;
 use utf8::all; # we're dealing with IRC so everything should be output in UTF-8
 
 use Metal::IRC;
 use Metal::Schema;
 use Metal::Util::Config;
+
+with 'Metal::Role::Logger';
 
 ################################################################################
 
@@ -22,6 +26,11 @@ has modules      => (is => 'rw', isa => 'HashRef',       lazy_build => 1);
 sub run {
     my $self = shift;
 
+    # Check if the bot has been launched before
+    my $user_count = $self->db->resultset('User')->search_rs->count();
+
+    $self->_first_run_setup() unless $user_count;
+
     $self->bot->loaded_modules($self->modules);
 
     # Initialise Reflex watchers
@@ -30,6 +39,40 @@ sub run {
     }
 
     return $self->bot->run_all();
+}
+
+################################################################################
+
+sub _first_run_setup {
+    my $self = shift;
+
+    # If anything else is built like this, extract into a "Wizard" class.
+
+    $self->logger->info('It appears to be your first run.');
+    $self->logger->info('Running setup wizard');
+
+    my $term = Term::ReadLine->new('Configuration');
+
+    my $add_admin_user = $term->ask_yn(
+        prompt  => 'Add an admin user?',
+        default => 'y',
+    );
+
+    if ($add_admin_user) {
+        my $nickname = $term->get_reply(prompt => 'Nickname');
+        my $hostmask = $term->get_reply(prompt => 'Hostmask');
+
+        my $user = $self->db->resultset('User')->create({
+            name     => $nickname,
+            hostmask => $hostmask,
+        });
+
+        $user->add_role('Admin');
+    } else {
+        $self->logger->info('You will need to manually give yourself the admin role in the database.');
+    }
+
+    return 1;
 }
 
 ################################################################################
@@ -89,4 +132,5 @@ sub _build_module_names {
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+__END__
 
