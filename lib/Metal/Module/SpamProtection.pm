@@ -43,14 +43,32 @@ sub on_bot_public {
         # Don't do heavy lifting for short messages
         return 1;
     }
-    
-    if ($hostname && $self->meets_msg_max_highlight_count($message, $channel)) {
-        if ($self->has_channel_access($channel, $self->our_nickname)) {
-            $self->bot->component->yield('kick' => $channel => $nickname => 'Mass highlighting');
-            $self->bot->component->yield('mode' => "${channel} +b *!*\@${hostname}");
-        } else {
-            $self->logger->warn("Bot does not have channel access to perform a ban (${channel})");
-        }
+
+    return unless $hostname;
+
+    if ($self->config->{spam_protection}->{non_utf8} && $self->meets_msg_max_non_utf8_count($message)) {
+        $self->_perform_ban($channel, $nickname, $hostname, 'Spam');
+    }
+
+    if ($self->config->{mass_hl} && $self->meets_msg_max_highlight_count($message, $channel)) {
+        $self->_perform_ban($channel, $nickname, $hostname, 'Mass highlighting');
+    }
+
+    return 1;
+}
+
+sub _perform_ban {
+    my $self     = shift;
+    my $channel  = shift;
+    my $nickname = shift;
+    my $hostname = shift;
+    my $reason   = shift;
+
+    if ($self->has_channel_access($channel, $self->our_nickname)) {
+        $self->bot->component->yield('kick' => $channel => $nickname => $reason);
+        $self->bot->component->yield('mode' => "${channel} +b *!*\@${hostname}");
+    } else {
+        $self->logger->warn("Bot does not have channel access to perform a ban (${channel})");
     }
 
     return 1;

@@ -9,10 +9,11 @@ requires qw(
 
 ################################################################################
 
-has default_min_filter_length => (is => 'ro', isa => 'Int', default => 10);
-has default_min_filter_length => (is => 'ro', isa => 'Int', default => 20);
-has default_min_word_count    => (is => 'ro', isa => 'Int', default => 5);
-has default_highlight_limit   => (is => 'ro', isa => 'Int', default => 5);
+has default_highlight_limit     => (is => 'ro', isa => 'Int', default => 5);
+has default_non_utf8_char_count => (is => 'ro', isa => 'Int', default => 10);
+has default_min_filter_length   => (is => 'ro', isa => 'Int', default => 10);
+has default_min_filter_length   => (is => 'ro', isa => 'Int', default => 20);
+has default_min_word_count      => (is => 'ro', isa => 'Int', default => 5);
 
 ################################################################################
 
@@ -65,8 +66,64 @@ sub meets_msg_max_highlight_count {
     return scalar keys %seen >= $highlight_limit;
 }
 
+sub meets_msg_max_non_utf8_count {
+    my $self = shift;
+    my $msg  = shift;
+
+    my $limit = $self->config->{non_utf8_char_count} // $self->default_non_utf8_char_count;
+    my $count = () = $msg =~ m/[^[:print:]]/g;
+
+    return $count >= $limit;
+}
+
 ################################################################################
 
 no Moose;
 1;
+__END__
+
+=head1 NAME
+
+Metal::Module::Role::SpamProtection::Qualification - is it spam?
+
+=head1 DESCRIPTION
+
+Validates given messages against known spammy behaviour e.g. mass highlighting,
+avoiding filters with strange characters.
+
+=back
+
+=head2 METHODS
+
+=over 4
+
+=item C<meets_msg_min_requirements()>
+
+Checks the incoming message against other methods in this class to see if it
+should be spamchecked.
+
+=item C<meets_msg_min_length()>
+
+Checks the message is over a certain character count which is either set in the
+config file or defaulted constant attribute C<default_min_filter_length>.
+
+=item C<meets_msg_min_word_count()>
+
+Checks the message has over a certain number of words in it. The minimum number
+is set either in the config file or defaulted to attribute
+C<default_min_word_count>.
+
+=item C<meets_msg_max_highlight_count()>
+
+Checks the number of nicknames highlighted in a given message against a list
+for the channel (must be provided by consumer module!). Again, this references
+a config value ('highlight_limit') and falls back to an attribute
+(C<default_highlight_limit>).
+
+=item C<meets_msg_max_non_utf8_count()>
+
+Checks if a message contains more than the maximum number of allowed non-utf8
+characters to catch spammers avoiding filters set network wide or per channel.
+
+=back
 

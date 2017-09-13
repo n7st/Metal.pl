@@ -26,4 +26,51 @@ sub BUILD {
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+__END__
+
+=head1 NAME
+
+Metal::Module - Base class for modules watching Metal::IRC.
+
+=head1 DESCRIPTION
+
+This module should be used as a base class for modules watching for events
+emitted by C<Metal::IRC>. It has access back to the main loop through the
+C<bot> attribute.
+
+=head2 ATTRIBUTES
+
+=over 4
+
+=item C<bot>
+
+Main 'bot' class for reverse access to IRC functionality. Also includes the
+bot's database handle.
+
+=item C<bot_watcher>
+
+Reflex watcher to collect events emitted by C<Metal::IRC>. These can be caught
+in this class or classes which extend it like so:
+
+    sub on_bot_public {
+        # Caught when the bot_watcher emits 'public'
+    }
+
+    sub on_bot_join {
+        # Caught when the bot_watcher emits 'join'
+    }
+
+    # etc
+
+=back
+
+=head2 METHODS
+
+=over 4
+
+=item C<BUILD()>
+
+Runtime method. Initialises the C<bot_watcher> attribute.
+
+=back
 
