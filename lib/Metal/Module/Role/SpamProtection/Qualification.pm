@@ -10,7 +10,7 @@ requires qw(
 ################################################################################
 
 has default_highlight_limit     => (is => 'ro', isa => 'Int', default => 5);
-has default_non_utf8_char_count => (is => 'ro', isa => 'Int', default => 10);
+has default_non_utf8_char_count => (is => 'ro', isa => 'Int', default => 12);
 has default_min_filter_length   => (is => 'ro', isa => 'Int', default => 10);
 has default_min_filter_length   => (is => 'ro', isa => 'Int', default => 20);
 has default_min_word_count      => (is => 'ro', isa => 'Int', default => 5);
@@ -124,6 +124,9 @@ a config value ('highlight_limit') and falls back to an attribute
 
 Checks if a message contains more than the maximum number of allowed non-utf8
 characters to catch spammers avoiding filters set network wide or per channel.
+
+Please note if non_utf8_char_count is set too low, false-positives are possible
+with Apple users (with special characters for ' and ").
 
 =back
 
