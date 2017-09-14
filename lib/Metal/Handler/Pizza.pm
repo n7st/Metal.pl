@@ -95,6 +95,8 @@ sub highscores {
 
     $output .= join ', ', @rows;
 
+    $output .= " | Graphs: https://pizza.netsplit.uk";
+
     return $output;
 }
 

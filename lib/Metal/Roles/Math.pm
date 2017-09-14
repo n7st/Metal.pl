@@ -10,6 +10,8 @@ sub percentage {
     my $num   = shift;
     my $total = shift;
 
+    return 0 unless $num && $total;
+
     return nearest(.001, ($num * 100) / $total) || 0;
 }
 

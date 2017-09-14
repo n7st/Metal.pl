@@ -79,6 +79,14 @@ sub irc_public {
 
     my $args = $self->args_as_hashref('PUBLIC', @_);
 
+    if ($args->{from}->{nick} =~ /brandon/ && $args->{original} =~ /((blood\ harvest|witchhammer)\ .+tape|draghkar|(my (drummer|band))|primer)/i) {
+        my @choices = ("bad logo bad name", "shut the fuck up, brandon");
+        my $choice  = $choices[rand @choices];
+        $kernel->post($heap->{irc} => privmsg => $args->{input_location} => $choice);
+    } elsif ($args->{original} =~ /draghkar/i) {
+        $kernel->post($heap->{irc} => privmsg => $args->{input_location} => "Excuse me but I think you mean Dragcar");
+    }
+
     return if $args->{from}->{nick} eq $self->config->{server}->{nickname};
 
     $self->_handle_command($kernel, $heap->{irc}, $args);
