@@ -9,6 +9,7 @@ use Metal::Integration::LastFM::Geo;
 use Metal::Integration::LastFM::User;
 
 extends 'Metal::Module';
+with    'Metal::Role::UserOrArg';
 
 ################################################################################
 
@@ -25,18 +26,12 @@ around [ qw(_now_playing _top_all _top_month _top_week _top_year) ] => sub {
     my $self = shift;
     my $args = shift;
 
-    # Get the current user's Last.fm name or one they've provided in the message
+    my $user            = $self->user_or_arg($args);
+    my $lastfm_username = $user && $user->lastfm;
 
-    my $user = $args->{message_args}->[0];
-
-    my $lastfm_username;
-
-    if ($args->{message_args}->[0]) {
+    if ($args->{message_args}->[0] && !$lastfm_username) {
+        # Fall through to provided name if we couldn't find a user
         $lastfm_username = $args->{message_args}->[0];
-    } else {
-        $lastfm_username = $self->bot->db->resultset('User')->search_rs({
-            hostmask => $args->{hostmask},
-        })->first->lastfm;
     }
 
     unless ($lastfm_username) {
@@ -55,9 +50,8 @@ around [ qw(_album_plays _artist_plays) ] => sub {
     # as well as an artist or album - only allow the current user to check their
     # own 'plays'.
 
-    my $lastfm_username = $self->bot->db->resultset('User')->search_rs({
-        hostmask => $args->{hostmask},
-    })->first->lastfm;
+    my $user            = $self->user_or_arg($args, { skip_args => 1 });
+    my $lastfm_username = $user && $user->lastfm;
 
     unless ($lastfm_username) {
         return $self->err_no_user;
@@ -278,7 +272,7 @@ sub _build_user {
 sub _build_err_no_user {
     my $self = shift;
 
-    my $trigger = $self->bot->config->{trigger};
+    my $trigger = $self->bot->config->{irc}->{trigger};
 
     return "No Last.fm username specified - set yours with ${trigger}setuser username_here";
 }

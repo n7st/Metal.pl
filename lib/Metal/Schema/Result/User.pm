@@ -40,6 +40,7 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('id');
 
 __PACKAGE__->has_many('roles' => 'Metal::Schema::Result::UserRole', 'user_id');
+__PACKAGE__->has_many('stats' => 'Metal::Schema::Result::UserStat', 'user_id');
 
 ################################################################################
 
