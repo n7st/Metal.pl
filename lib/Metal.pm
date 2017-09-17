@@ -1,5 +1,7 @@
 package Metal;
 
+# ABSTRACT: Base class for Metal IRC bot
+
 use Moose;
 use Term::ReadLine;
 use Term::UI;
