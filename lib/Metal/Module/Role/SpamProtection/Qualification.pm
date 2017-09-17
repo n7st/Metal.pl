@@ -91,8 +91,6 @@ Metal::Module::Role::SpamProtection::Qualification - is it spam?
 Validates given messages against known spammy behaviour e.g. mass highlighting,
 avoiding filters with strange characters.
 
-=back
-
 =head2 METHODS
 
 =over 4
@@ -129,4 +127,8 @@ Please note if non_utf8_char_count is set too low, false-positives are possible
 with Apple users (with special characters for ' and ").
 
 =back
+
+=head1 AUTHOR
+
+Mike Jones L<email:mike@netsplit.org.uk>
 

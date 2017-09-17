@@ -3,6 +3,7 @@ package Metal::Schema::ResultSet::Stat;
 use strict;
 use warnings;
 
+use Data::Printer;
 use DateTime;
 
 use base 'DBIx::Class::ResultSet';
@@ -71,11 +72,15 @@ sub user_stat_today {
     my $handle  = shift;
     my $user_id = shift;
 
-    my $dtf        = $self->result_source->schema->storage->datetime_parser;
-    my $yesterday  = DateTime->now->subtract(days => 1);
-    my $user_stats = $self->search_rs({ name => $handle })->first->user_stats;
+    my $dtf       = $self->result_source->schema->storage->datetime_parser;
+    my $yesterday = DateTime->now->subtract(days => 1);
+    my $stats     = $self->search_rs({ name => $handle })->first;
 
-    return $user_stats->search_rs({
+    return 0 unless $stats;
+
+    my $for_user = $stats->user_stats;
+
+    return $for_user->search_rs({
         user_id      => $user_id,
         date_created => { '>=' => $dtf->format_datetime($yesterday) }, 
     })->count();

@@ -16,6 +16,8 @@ watches bot_watcher => (is => 'rw', isa => 'Metal::IRC', role => 'bot');
 sub BUILD {
     my $self = shift;
 
+    # TODO: option for watching the POCO object for overrides
+
     $self->bot_watcher($self->bot);
 
     return 1;

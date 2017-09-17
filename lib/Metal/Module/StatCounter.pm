@@ -1,6 +1,5 @@
 package Metal::Module::StatCounter;
 
-use DDP;
 use Moose;
 
 extends 'Metal::Module';
@@ -10,7 +9,9 @@ with    'Metal::Role::UserOrArg';
 
 has default_max_stat_per_day => (is => 'ro', isa => 'Int', default => 3);
 
-has max_stat_per_day => (is => 'ro', isa => 'Int', lazy_build => 1);
+has commands         => (is => 'ro', isa => 'ArrayRef',   lazy_build => 1);
+has graph_url        => (is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
+has max_stat_per_day => (is => 'ro', isa => 'Int',        lazy_build => 1);
 
 around [ qw(_increment _decrement) ] => sub {
     my $orig   = shift;
@@ -46,12 +47,12 @@ sub on_bot_public {
 
     my ($handle, $output);
 
-    if (($handle) = $event->{args}->{message} =~ /^(\w+)\+\+$/) {
-        $output = $self->_increment($event->{args}, $handle);
-    } elsif (($handle) = $event->{args}->{message} =~ /^(\w+)\-\-$/) {
-        $output = $self->_decrement($event->{args}, $handle);
-    } elsif (($handle) = $event->{args}->{command} =~ /^(\w+)stats$/) {
-        $output = $self->_stats($event->{args}, $handle);
+    foreach my $command (@{$self->commands}) {
+        if (($handle) = $event->{args}->{$command->{location}} =~ $command->{regex}) {
+            my $method = $command->{method};
+
+            $output = $self->$method($event->{args}, $handle);
+        }
     }
 
     $self->bot->message_channel($event->{args}->{channel}, $output);
@@ -100,17 +101,63 @@ sub _stats {
         'stat.name' => $handle,
     }, {
         prefetch => [ 'stat' ],
-    })->all;
+    })->all();
 
     return sprintf('%s count for %s: %d', $handle, $user->name, $count);
 }
 
+sub _highscores {
+    my $self   = shift;
+    my $args   = shift;
+    my $handle = shift;
+
+    my $highscores = $self->bot->db->resultset('UserStat')->highscores($handle, 6);
+
+    return "There are no highscores for ${handle}" unless @{$highscores};
+
+    my $user_scores = join(', ', map { sprintf('%s: %s', $_->{name}, $_->{score}) } @{$highscores});
+    my $graph_desc  = $self->graph_url ? 'Graphs: '.$self->graph_url : '';
+
+    return sprintf('%s highscores: %s%s', $handle, $user_scores, $graph_desc);
+}
+
 ################################################################################
+
+sub _build_commands {
+    # method:   the subroutine in this class to run
+    # location: where we're doing the regex match (i.e. in the message or
+    #           command)
+    # regex:    the match we're looking for
+
+    return [{
+        method   => '_increment',
+        location => 'message',
+        regex    => qr/^(\w+)\+\+$/,
+    }, {
+        method   => '_decrement',
+        location => 'message',
+        regex    => qr/^(\w+)\-\-$/,
+    }, {
+        method   => '_stats',
+        location => 'command',
+        regex    => qr/^(\w+)stats$/,
+    }, {
+        method   => '_highscores',
+        location => 'command',
+        regex    => qr/^(\w+)highscores$/,
+    }];
+}
+
+sub _build_graph_url {
+    my $self = shift;
+
+    return $self->bog->config->{stats}->{graph_url};
+}
 
 sub _build_max_stat_per_day {
     my $self = shift;
 
-    return $self->default_max_stat_per_day;
+    return $self->bot->config->{stats}->{max_per_day} || $self->default_max_stat_per_day;
 }
 
 ################################################################################
