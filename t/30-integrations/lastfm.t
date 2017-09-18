@@ -13,8 +13,8 @@ require_ok('Metal::Integration::LastFM::User')   || BAIL_OUT('User module could 
 require_ok('Metal::Util::Config')                || BAIL_OUT('Config module could not be included');
 
 ok(my $config_util = Metal::Util::Config->new({
-    filename => './data/config.yml',
-}), 'Config initialisation') || BAIL_OUT('Missing config file (./data/config.yml)');
+    filename => './data/config.yml.example',
+}), 'Config initialisation') || BAIL_OUT('Missing config file (./data/config.yml.example)');
 
 my $api_key = $config_util->config->{lastfm}->{api_key};
 
