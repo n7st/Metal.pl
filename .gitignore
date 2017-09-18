@@ -23,7 +23,9 @@ data/config.yml
 *.sw0
 *.swo
 data/cache/*.json
+backup/data/config.yml
 share/metal-schema/*
 share/metal-schema.db
+*.db
 
 /Metal-*
