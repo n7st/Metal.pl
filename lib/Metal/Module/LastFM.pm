@@ -66,15 +66,7 @@ sub on_bot_public {
     my $self  = shift;
     my $event = shift;
 
-    my $command     = $event->{args}->{command};
-    my $artist_name = $event->{args}->{message_arg_str};
-    my $output;
-
-    if ($self->commands->{$command}) {
-        my $subroutine = $self->commands->{$command};
-
-        $output = $self->$subroutine($event->{args});
-    }
+    my $output = $self->_attempt_command($event->{args});
 
     $self->bot->message_channel($event->{args}->{channel}, $output);
 

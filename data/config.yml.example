@@ -32,13 +32,14 @@ spam_protection:
     non_utf8_char_count: 5
 
 loaded_modules:
-    - Metal::Module::ModuleManagement
-    - Metal::Module::Ping
+    - Metal::Module::Core::Connection
+    - Metal::Module::Core::Changelog
+    - Metal::Module::Core::Ping
+    - Metal::Module::Core::ModuleManagement
     - Metal::Module::SpamProtection
     - Metal::Module::LastFM
     - Metal::Module::Replacement
     - Metal::Module::StatCounter
-    - Metal::Module::Changelog
 
 # Settings for individual modules
 lastfm:

@@ -1,9 +1,11 @@
 package Metal::Schema::Result::User;
 
-use strict;
-use warnings;
+use Data::Printer;
+use Moose;
+use MooseX::NonMoose;
 
 use base 'DBIx::Class::Core';
+extends  'DBIx::Class::Core';
 
 ################################################################################
 
@@ -44,7 +46,8 @@ __PACKAGE__->has_many('stats' => 'Metal::Schema::Result::UserStat', 'user_id');
 
 ################################################################################
 
-sub add_role {
+around [ qw(add_role) ] => sub {
+    my $orig = shift;
     my $self = shift;
     my $name = shift;
 
@@ -54,12 +57,40 @@ sub add_role {
 
     return unless $role;
 
-    return $self->create_related('roles', {
-        role_id => $role->id,
-    });
+    return $self->$orig($role);
+};
+
+################################################################################
+
+sub add_role {
+    my $self = shift;
+    my $role = shift;
+
+    return $self->create_related('roles', { role_id => $role->id });
+}
+
+sub has_role {
+    my $self = shift;
+    my $name = shift;
+
+    my $roles_rs = $self->roles;
+    my $role;
+
+    while (my $user_role = $roles_rs->next()) {
+        if ($user_role->role->name eq $name) {
+            $role = $user_role->role;
+
+            last;
+        }
+    }
+
+    return 0 unless $role;
+    return $self->search_related('roles', { role_id => $role->id }) ? 1 : 0;
 }
 
 ################################################################################
 
+no Moose;
+__PACKAGE__->meta->make_immutable();
 1;
 

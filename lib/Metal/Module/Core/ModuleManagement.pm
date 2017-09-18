@@ -1,7 +1,6 @@
-package Metal::Module::ModuleManagement;
+package Metal::Module::Core::ModuleManagement;
 
 use Class::Unload;
-use Data::Printer;
 use List::Util qw(first);
 use Moose;
 
@@ -46,6 +45,9 @@ sub _list_modules {
 }
 
 =cut
+
+# TODO: _load and _unload_module are both kinda busted at the moment...
+
 sub _load_module {
     my $self   = shift;
     my $module = shift;
@@ -121,7 +123,7 @@ __END__
 
 =head1 NAME
 
-Metal::Module::ModuleManagement
+Metal::Module::Core::ModuleManagement
 
 =head1 DESCRIPTION
 

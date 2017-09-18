@@ -25,6 +25,25 @@ sub BUILD {
 
 ################################################################################
 
+sub _attempt_command {
+    my $self = shift;
+    my $args = shift;
+
+    return unless $self->commands;
+
+    my $command = $args->{command};
+
+    return unless $command;
+
+    if (my $method = $self->commands->{$command}) {
+        return $self->$method($args);
+    }
+
+    return;
+}
+
+################################################################################
+
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
@@ -73,6 +92,11 @@ in this class or classes which extend it like so:
 =item C<BUILD()>
 
 Runtime method. Initialises the C<bot_watcher> attribute.
+
+=item C<_attempt_command()>
+
+If a C<commands> attribute exists in the child class, attempt to match a
+requested command to a method in the class and run it.
 
 =back
 

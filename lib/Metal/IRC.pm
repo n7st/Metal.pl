@@ -68,6 +68,13 @@ sub message_channel {
     return 1;
 }
 
+sub yield {
+    my $self = shift;
+    my @args = @_;
+
+    return $self->component->yield(@args);
+}
+
 sub on_poco_irc_001 {
     my $self  = shift;
     my $event = shift;

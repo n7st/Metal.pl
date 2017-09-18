@@ -1,4 +1,4 @@
-package Metal::Module::Changelog;
+package Metal::Module::Core::Changelog;
 
 use Moose;
 
@@ -39,7 +39,7 @@ __END__
 
 =head1 NAME
 
-Metal::Module::Changelog
+Metal::Module::Core::Changelog
 
 =head1 DESCRIPTION
 
