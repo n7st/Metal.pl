@@ -1,0 +1,51 @@
+# General configuration for the IRC connection
+irc:
+    server: irc.snoonet.org
+    port: 6697
+    nickname: Metalbot
+    nickserv_password: hunter2
+    ident: Metal
+    ircname: Metal - Perl IRC Bot
+    use_ssl: 1
+    debug: 1
+    trigger: '!'
+    channels:
+        - '##somewhere'
+
+changelog: https://netsplit.uk/bot_changelog.txt
+
+# Connection information for SQLite3 DB
+db:
+    dsn: dbi:SQLite:share/metal-schema.db
+
+# Settings for the SpamProtection module
+spam_protection:
+    # Maximum number of nicknames that can be said in one message
+    highlight_limit: 5
+    # Minimum length of a message to check for mass highlights
+    min_filter_len: 10
+    # Minimum wordcount of a message to check for mass highlights
+    min_word_count: 5
+    # Watch non-UTF8 messages
+    non_utf8: 1
+    mass_hl: 1
+    non_utf8_char_count: 5
+
+loaded_modules:
+    - Metal::Module::Core::Connection
+    - Metal::Module::Core::Changelog
+    - Metal::Module::Core::Ping
+    - Metal::Module::Core::ModuleManagement
+    - Metal::Module::SpamProtection
+    - Metal::Module::LastFM
+    - Metal::Module::Replacement
+    - Metal::Module::StatCounter
+
+# Settings for individual modules
+lastfm:
+    api_key: 1234
+
+replacement:
+    minimum: 999
+    word: butts
+
