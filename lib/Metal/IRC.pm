@@ -221,4 +221,112 @@ sub _build_trigger {
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+__END__
+
+=head1 NAME
+
+Metal::IRC - IRC handler
+
+=head1 DESCRIPTION
+
+Watches POE::Component::IRC(::State) for input and translates it to events to
+be received by modules. Mostly, this module is a thin layer to tidy up and
+summarise event arguments.
+
+=head2 ATTRIBUTES
+
+=over 4
+
+=item C<component>
+
+POE::Component::IRC::State accessor which can receive commands to return to the
+IRC server.
+
+=item C<trigger>
+
+Character used for triggering bot commands.
+
+=item C<config>
+
+HashRef of contents from the config file.
+
+=item C<db>
+
+Live database handle.
+
+=item C<loaded_modules>
+
+Active (i.e. currently watching) bot modules.
+
+=item C<poco_watcher>
+
+Reflex watcher which receives events from C<POE::Component::IRC::State>.
+
+=back
+
+=head2 METHODS
+
+=over 4
+
+=item C<BUILD()>
+
+Sets up the watcher for C<POE::Component::IRC::State> and initialises plugins
+for the same. Runtime events for the component are also triggered.
+
+=item C<message_channel()>
+
+Uses the component to send a message to a given channel.
+
+=item C<yield()>
+
+Quick-access to the component's C<yield()> method.
+
+=item C<_emit_named_argument_event()>
+
+Sends an event with a hashref of arguments using
+C<Reflex::Event::NamedArgument>.
+
+=back
+
+=head2 METHODS - EVENT RECEIVERS
+
+The following methods are events triggered by the C<poco_watcher>, and take
+arguments from the component and sanitise them. They emit their own events with
+new arguments provided.
+
+=over 4
+
+=item C<on_poco_irc_001>
+
+=item C<on_poco_irc_public>
+
+=item C<on_poco_irc_chan_sync>
+
+=item C<on_poco_irc_kick>
+
+=item C<on_poco_irc_nick>
+
+=item C<on_poco_irc_nick_sync>
+
+=item C<on_poco_irc_disconnected>
+
+=back
+
+=head1 SEE ALSO
+
+The following items have documentation on CPAN:
+
+=over 4
+
+=item C<Reflex>
+
+=item C<POE::Component::IRC>
+
+=item C<POE::Component::IRC::State>
+
+=back
+
+=head1 AUTHOR
+
+Mike Jones L<email:mike@netsplit.org.uk>
 
