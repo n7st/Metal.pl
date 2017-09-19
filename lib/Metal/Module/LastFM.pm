@@ -1,6 +1,5 @@
 package Metal::Module::LastFM;
 
-use DDP;
 use List::MoreUtils qw(any);
 use Moose;
 

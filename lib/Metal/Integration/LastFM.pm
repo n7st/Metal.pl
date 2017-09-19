@@ -1,6 +1,5 @@
 package Metal::Integration::LastFM;
 
-use Data::Printer;
 use JSON::XS    qw(decode_json);
 use LWP::Simple qw(get);
 use Moose;

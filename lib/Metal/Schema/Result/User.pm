@@ -1,6 +1,5 @@
 package Metal::Schema::Result::User;
 
-use Data::Printer;
 use Moose;
 use MooseX::NonMoose;
 

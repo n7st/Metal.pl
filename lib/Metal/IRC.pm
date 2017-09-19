@@ -1,6 +1,5 @@
 package Metal::IRC;
 
-use Data::Printer;
 use Moose;
 use POE qw(Component::IRC::State Component::IRC::Plugin::NickServID Component::SSLify);
 use Reflex::Event::NamedArgument;

@@ -1,6 +1,5 @@
 package Metal::Integration::LastFM::Artist;
 
-use Data::Printer;
 use Moose;
 
 extends 'Metal::Integration::LastFM';

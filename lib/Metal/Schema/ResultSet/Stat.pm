@@ -3,7 +3,6 @@ package Metal::Schema::ResultSet::Stat;
 use strict;
 use warnings;
 
-use Data::Printer;
 use DateTime;
 
 use base 'DBIx::Class::ResultSet';
