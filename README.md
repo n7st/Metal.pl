@@ -6,5 +6,3 @@ An IRC bot frame built with Moose and Reflex (with POE).
 
 ## Installation
 
-TODO
-
