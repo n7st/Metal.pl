@@ -32,13 +32,7 @@ sub run {
     my $user_count = $self->db->resultset('User')->search_rs->count();
 
     $self->_first_run_setup() unless $user_count;
-
     $self->bot->loaded_modules($self->modules);
-
-    # Initialise Reflex watchers
-    foreach my $module (values %{$self->modules}) {
-        $module->run_all();
-    }
 
     return $self->bot->run_all();
 }
@@ -113,7 +107,11 @@ sub _build_modules {
     foreach my $module (@{$self->module_names}) {
         (my $file = $module.'.pm') =~ s{::}{/}g;
 
+        $self->logger->debug("Loading ${module}...");
+
         require $file;
+
+        $self->logger->debug("Loaded ${module}.");
 
         $modules{$module} = $module->new({
             bot => $self->bot,

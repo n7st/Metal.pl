@@ -5,6 +5,7 @@ use POE qw(Component::IRC::State Component::IRC::Plugin::NickServID Component::S
 use Reflex::Event::NamedArgument;
 use Reflex::POE::Session;
 use Reflex::Trait::Watched qw(watches);
+use utf8::all;
 
 extends 'Reflex::Base';
 with    qw(
