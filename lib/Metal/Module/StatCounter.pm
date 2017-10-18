@@ -145,6 +145,10 @@ sub _build_commands {
         method   => '_highscores',
         location => 'command',
         regex    => qr/^(\w+)highscores$/,
+    }, {
+        method   => '_highscores',
+        location => 'command',
+        regex    => qr/^(\w+)gods$/,
     }];
 }
 
