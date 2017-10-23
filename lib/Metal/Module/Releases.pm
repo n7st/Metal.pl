@@ -5,7 +5,10 @@ use LWP::Simple 'get';
 use Moose;
 
 extends 'Metal::Module';
-with    'Metal::Role::Logger';
+with    qw(
+    Metal::Role::Logger
+    Metal::Module::Role::Blockable
+);
 
 ################################################################################
 

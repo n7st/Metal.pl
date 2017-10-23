@@ -3,6 +3,7 @@ package Metal::Module::Lenny;
 use Moose;
 
 extends 'Metal::Module';
+with    'Metal::Module::Role::Blockable';
 
 ################################################################################
 

@@ -27,3 +27,4 @@ tmp/*
 share/metal-schema/*
 share/metal-schema.db
 *.db
+.idea

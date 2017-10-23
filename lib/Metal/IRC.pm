@@ -92,13 +92,16 @@ sub on_poco_irc_public {
     my $self  = shift;
     my $event = shift;
 
+    my $full_host = $event->{args}->[0];
+
+    my ($nickname, $ident, $hostmask) = $full_host =~ /^(.+)!(.+)@(.+)$/;
+
+    return if $self->component->{INFO}->{RealNick} eq $nickname;
+
     my $message      = $event->{args}->[2];
-    my $full_host    = $event->{args}->[0];
     my @message_args = split / /, $message;
     my $trigger      = $self->trigger;
     my $command      = '';
-
-    my ($nickname, $ident, $hostmask) = $full_host =~ /^(.+)!(.+)@(.+)$/;
 
     if ($message_args[0] =~ /^\Q$trigger\E/) {
         $command = shift @message_args;
@@ -115,6 +118,7 @@ sub on_poco_irc_public {
         message_args    => \@message_args,
         message_arg_str => join(' ', @message_args),
         poco_args       => $event->{args},
+        ident           => $ident,
     });
 }
 

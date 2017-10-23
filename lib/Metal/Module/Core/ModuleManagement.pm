@@ -1,11 +1,17 @@
 package Metal::Module::Core::ModuleManagement;
 
-use Class::Unload;
-use List::Util qw(first);
+use List::Util qw(any first);
 use Moose;
 
 extends 'Metal::Module';
-with    'Metal::Role::Logger';
+with    qw(
+    Metal::Role::Logger
+    Metal::Role::UserOrArg
+);
+
+################################################################################
+
+has commands => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 
 ################################################################################
 
@@ -13,15 +19,7 @@ sub on_bot_public {
     my $self  = shift;
     my $event = shift;
 
-    my $output;
-
-    if ($event->{args}->{command} eq 'modules') {
-        $output = $self->_list_modules();
-    } elsif ($event->{args}->{command} eq 'unload') {
-        #$output = $self->_unload_module($event->{args}->{message_args}->[0]);
-    } elsif ($event->{args}->{command} eq 'load') {
-        #$output = $self->_load_module($event->{args}->{message_args}->[0]);
-    }
+    my $output = $self->_attempt_command($event->{args});
 
     $self->bot->message_channel($event->{args}->{channel}, $output);
 
@@ -30,89 +28,78 @@ sub on_bot_public {
 
 ################################################################################
 
+around [ qw(_load _unload) ] => sub {
+    my $orig = shift;
+    my $self = shift;
+    my $args = shift;
+
+    my $current_user = $self->user_or_arg($args, { skip_args => 1 });
+
+    return unless $current_user->has_role('Admin');
+
+    my $module_name = $args->{message_args}->[0];
+
+    return 'No module name provided' unless $module_name;
+
+    my $kx = first { $_ eq $module_name } keys %{$self->bot->loaded_modules};
+
+    return "No such module: ${module_name}" unless $kx;
+
+    my $module = $self->bot->loaded_modules->{$kx};
+
+    return "Could not unload ${module_name}" unless $module->can('unloaded');
+    return $self->$orig($args, $module, $module_name);
+};
+
 sub _list_modules {
     my $self = shift;
 
     my @modules;
 
     foreach (keys %{$self->bot->loaded_modules}) {
-        my ($module) = $_ =~ /^Metal::Module::(.+)$/;
+        my $module = $self->bot->loaded_modules->{$_};
 
-        push @modules, $module;
+        next if $module->can('unloaded') && $module->unloaded == 1;
+
+        my ($name) = $_ =~ /^Metal::Module::(.+)$/;
+
+        push @modules, $name;
     }
 
     return join ', ', @modules;
 }
 
-=cut
+sub _load {
+    my $self        = shift;
+    my $args        = shift;
+    my $module      = shift;
+    my $module_name = shift;
 
-# TODO: _load and _unload_module are both kinda busted at the moment...
+    $module->unloaded(0);
 
-sub _load_module {
-    my $self   = shift;
-    my $module = shift;
+    return "Loaded ${module_name}";
+}
 
-    my $full_name = "Metal::Module::${module}";
+sub _unload {
+    my $self        = shift;
+    my $args        = shift;
+    my $module      = shift;
+    my $module_name = shift;
 
-    return 'A module name is required'   unless $module;
-    return 'You cannot load this module' if $full_name eq __PACKAGE__;
+    $module->unloaded(1);
 
-    my $loaded_modules = $self->bot->loaded_modules;;
+    return "Unloaded ${module_name}";
+}
 
-    eval {
-        (my $file = $full_name.'.pm') =~ s{::}{/}g;
+################################################################################
 
-        require $file;
-
-        $loaded_modules->{$full_name} = $full_name->new({
-            bot => $self->bot,
-        });
+sub _build_commands {
+    return {
+        load    => '_load',
+        modules => '_list_modules',
+        unload  => '_unload',
     };
-    if ($@) {
-        return 'Module could not be loaded';
-    }
-
-    $self->bot->loaded_modules($loaded_modules);
-
-    return "Loaded ${module}";
 }
-
-sub _unload_module {
-    my $self   = shift;
-    my $module = shift;
-
-    my $output;
-
-    unless ($module) {
-        return 'A module name is required';
-    }
-
-    my $full_name = "Metal::Module::${module}";
-
-    if ($full_name eq __PACKAGE__) {
-        return 'You cannot unload this module';
-    }
-
-    # Make sure the module is actually loaded...
-    my $existing_modules = $self->bot->loaded_modules;
-    my $requested_module = $existing_modules->{$full_name};
-
-    unless ($requested_module) {
-        return 'That module is not loaded';
-    }
-
-    $output = "Unloading ${full_name}";
-
-    $requested_module->DEMOLISH();
-
-    Class::Unload->unload($module);
-    delete $existing_modules->{$full_name};
-
-    $self->bot->loaded_modules($existing_modules);
-
-    return $output;
-}
-=cut
 
 ################################################################################
 

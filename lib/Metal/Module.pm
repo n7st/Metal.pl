@@ -1,5 +1,6 @@
 package Metal::Module;
 
+use Data::Printer;
 use Moose;
 use Reflex::Trait::Watched qw(watches);
 
@@ -26,16 +27,17 @@ sub BUILD {
 ################################################################################
 
 sub _attempt_command {
-    my $self = shift;
-    my $args = shift;
+    my $self   = shift;
+    my $args   = shift;
+    my $handle = shift || 'commands';
 
-    return unless $self->commands;
+    return unless $self->$handle;
 
     my $command = $args->{command};
 
     return unless $command;
 
-    if (my $method = $self->commands->{$command}) {
+    if (my $method = $self->{$handle}->{$command}) {
         return $self->$method($args);
     }
 
