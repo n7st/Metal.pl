@@ -1,5 +1,6 @@
 package Metal::IRC;
 
+use List::Util qw(any);
 use Moose;
 use POE qw(Component::IRC::State Component::IRC::Plugin::NickServID Component::SSLify);
 use Reflex::Event::NamedArgument;
@@ -92,11 +93,20 @@ sub on_poco_irc_public {
     my $self  = shift;
     my $event = shift;
 
+    # TODO: move this to an `around` if/when private messages and notices are
+    # supported
+
     my $full_host = $event->{args}->[0];
 
     my ($nickname, $ident, $hostmask) = $full_host =~ /^(.+)!(.+)@(.+)$/;
 
     return if $self->component->{INFO}->{RealNick} eq $nickname;
+
+    my @users = $self->db->resultset('User')->search_rs({
+        hostmask => $hostmask,
+    })->all();
+
+    return if any { $_->ignored } @users;
 
     my $message      = $event->{args}->[2];
     my @message_args = split / /, $message;

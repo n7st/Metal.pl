@@ -1,0 +1,33 @@
+{
+   "belongs_to" : {
+      "fetch" : 0
+   },
+   "has_many" : {
+      "fetch" : 0
+   },
+   "might_have" : {
+      "fetch" : 0
+   },
+   "sets" : [
+      {
+         "quantity" : "all",
+         "class" : "UserRole"
+      },
+      {
+         "quantity" : "all",
+         "class" : "Stat"
+      },
+      {
+         "class" : "User",
+         "quantity" : "all"
+      },
+      {
+         "class" : "UserStat",
+         "quantity" : "all"
+      },
+      {
+         "quantity" : "all",
+         "class" : "Role"
+      }
+   ]
+}

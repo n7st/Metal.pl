@@ -36,6 +36,12 @@ __PACKAGE__->add_columns(
         is_nullable => 1,
         size        => 20,
     },
+    ignored  => {
+        data_type   => 'integer',
+        size        => 0,
+        default     => 0,
+        is_nullable => 1,
+    },
 );
 
 __PACKAGE__->set_primary_key('id');
@@ -55,7 +61,6 @@ around [ qw(add_role) ] => sub {
     })->first;
 
     return unless $role;
-
     return $self->$orig($role);
 };
 
@@ -92,4 +97,27 @@ sub has_role {
 no Moose;
 __PACKAGE__->meta->make_immutable();
 1;
+__END__
+
+=head1 NAME
+
+Metal::Schema::Result::User
+
+=head1 DESCRIPTION
+
+Schema class for User objects.
+
+=head2 METHODS
+
+=over 4
+
+=item C<add_role()>
+
+Give the user access to a role.
+
+=item C<has_role()>
+
+Check if the user has access to a role.
+
+=back
 
