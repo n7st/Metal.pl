@@ -126,6 +126,11 @@ sub now_playing {
         username    => $user,
     });
 
+    return {
+        error   => 1,
+        summary => "No recent tracks for ${user}",
+    } unless $track;
+
     my $track_info = Metal::Integration::LastFM::User::TrackInfo->new({
         artist_data     => $artist->{artist},
         track_data      => $track,
