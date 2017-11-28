@@ -51,7 +51,7 @@ sub on_bot_public {
         if (($handle) = $event->{args}->{$command->{location}} =~ $command->{regex}) {
             my $method = $command->{method};
 
-            $output = $self->$method($event->{args}, $handle);
+            $output = $self->$method($event->{args}, lc($handle));
         }
     }
 
