@@ -1,5 +1,6 @@
 package Metal::Integration::LastFM::User;
 
+use Data::Printer;
 use Moose;
 
 use Metal::Integration::LastFM::User::TrackInfo;
@@ -35,13 +36,41 @@ sub album_plays {
     my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($info);
 
     my $summary = sprintf("%s/%s has %d total plays, of which %d are %s's (%s%%).",
-        $info->{artist},
-        $info->{name},
-        $playcount,
-        $user_playcount,
-        $user,
-        $percentage,
-    );
+        $info->{artist}, $info->{name}, $playcount, $user_playcount, $user, $percentage);
+
+    return {
+        error      => 0,
+        summary    => $summary,
+        playcounts => {
+            user  => $user_playcount,
+            total => $playcount,
+        },
+    };
+}
+
+sub song_plays {
+    my $self   = shift;
+    my $user   = shift;
+    my $artist = shift;
+    my $song   = shift;
+
+    my $response = $self->_get_query('track.getInfo', {
+        username => $user, # Not "user" as for album.getInfo
+        artist   => $artist,
+        track    => $song,
+    });
+
+    return {
+        summary => $response->{message},
+        error   => $response->{error},
+    } if $response->{error};
+
+    my $info = $response->{track};
+
+    my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($info);
+
+    my $summary = sprintf("%s by %s has %d total plays, of which %d are %s's (%s%%)",
+        $info->{name}, $info->{artist}->{name}, $playcount, $user_playcount, $user, $percentage);
 
     return {
         error      => 0,
@@ -73,12 +102,7 @@ sub artist_plays {
     my ($user_playcount, $playcount, $percentage) = $self->_get_playcount_data($info->{stats});
 
     my $summary = sprintf("%s have %s total plays, of which %d are %s's (%s%%).",
-        $info->{name},
-        $playcount,
-        $user_playcount,
-        $user,
-        $percentage,
-    );
+        $info->{name}, $playcount, $user_playcount, $user, $percentage);
 
     return {
         error      => 0,

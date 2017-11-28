@@ -42,7 +42,7 @@ around [ qw(_now_playing _top_all _top_month _top_week _top_year) ] => sub {
     return $self->$orig($args, $lastfm_username);
 };
 
-around [ qw(_album_plays _artist_plays) ] => sub {
+around [ qw(_album_plays _artist_plays _song_plays) ] => sub {
     my $orig = shift;
     my $self = shift;
     my $args = shift;
@@ -135,8 +135,7 @@ sub _album_plays {
     my $args            = shift;
     my $lastfm_username = shift;
 
-    # This could be more robust
-    my ($artist, $album) = $args->{message_arg_str} =~ /^(.+) "(.+)"$/;
+    my ($artist, $album) = $self->_extract_artist_and_title($args->{message_arg_str});
 
     return 'You must provide a band and album name (format: band name "album name")'
         unless $artist && $album;
@@ -154,6 +153,29 @@ sub _artist_plays {
     return 'You must provide a band name' unless $artist;
 
     return $self->user->artist_plays($lastfm_username, $artist)->{summary};
+}
+
+sub _song_plays {
+    my $self            = shift;
+    my $args            = shift;
+    my $lastfm_username = shift;
+
+    my ($artist, $title) = $self->_extract_artist_and_title($args->{message_arg_str});
+
+    return 'You must provide a band and song name (format: band name "song name")'
+        unless $artist && $title;
+
+    return $self->user->song_plays($lastfm_username, $artist, $title)->{summary};
+}
+
+sub _extract_artist_and_title {
+    my $self  = shift;
+    my $input = shift;
+
+    # This could be more robust
+    my ($artist, $title) = $input =~ /^(.+) "(.+)"$/;
+
+    return ($artist, $title);
 }
 
 sub _set_user {
@@ -222,6 +244,7 @@ sub _build_commands {
         topa       => '_top_all',
         aplays     => '_album_plays',
         plays      => '_artist_plays',
+        splays     => '_song_plays',
     };
 }
 
