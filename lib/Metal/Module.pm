@@ -1,6 +1,5 @@
 package Metal::Module;
 
-use Data::Printer;
 use Moose;
 use Reflex::Trait::Watched qw(watches);
 
@@ -22,26 +21,6 @@ sub BUILD {
     $self->bot_watcher($self->bot);
 
     return 1;
-}
-
-################################################################################
-
-sub _attempt_command {
-    my $self   = shift;
-    my $args   = shift;
-    my $handle = shift || 'commands';
-
-    return unless $self->$handle;
-
-    my $command = $args->{command};
-
-    return unless $command;
-
-    if (my $method = $self->{$handle}->{$command}) {
-        return $self->$method($args);
-    }
-
-    return;
 }
 
 ################################################################################
@@ -94,11 +73,6 @@ in this class or classes which extend it like so:
 =item C<BUILD()>
 
 Runtime method. Initialises the C<bot_watcher> attribute.
-
-=item C<_attempt_command()>
-
-If a C<commands> attribute exists in the child class, attempt to match a
-requested command to a method in the class and run it.
 
 =back
 

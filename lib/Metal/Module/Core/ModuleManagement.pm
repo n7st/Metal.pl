@@ -7,24 +7,8 @@ extends 'Metal::Module';
 with    qw(
     Metal::Role::Logger
     Metal::Role::UserOrArg
+    Metal::Module::Role::WithCommands
 );
-
-################################################################################
-
-has commands => (is => 'ro', isa => 'HashRef', lazy_build => 1);
-
-################################################################################
-
-sub on_bot_public {
-    my $self  = shift;
-    my $event = shift;
-
-    my $output = $self->_attempt_command($event->{args});
-
-    $self->bot->message_channel($event->{args}->{channel}, $output);
-
-    return 1;
-}
 
 ################################################################################
 
@@ -119,10 +103,6 @@ Commands related to management and listing of the bot's loaded modules.
 =head2 METHODS
 
 =over 4
-
-=item C<on_bot_public()>
-
-Runs on every public message the bot sees, potentially triggering a command.
 
 =back
 

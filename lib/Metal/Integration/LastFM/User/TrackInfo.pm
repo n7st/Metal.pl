@@ -52,7 +52,7 @@ sub _build_title {
 sub _build_now_playing_desc {
     my $self = shift;
 
-    return $self->is_now_playing ? 'is now playing' : 'last_played';
+    return $self->is_now_playing ? 'is now playing' : 'last played';
 }
 
 sub _build_tags {

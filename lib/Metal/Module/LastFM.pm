@@ -8,12 +8,14 @@ use Metal::Integration::LastFM::Geo;
 use Metal::Integration::LastFM::User;
 
 extends 'Metal::Module';
-with    'Metal::Role::UserOrArg';
+with    qw(
+    Metal::Role::UserOrArg
+    Metal::Module::Role::WithCommands
+);
 
 ################################################################################
 
 has api_key  => (is => 'ro', isa => 'Str',                                lazy_build => 1);
-has commands => (is => 'ro', isa => 'HashRef',                            lazy_build => 1);
 has artist   => (is => 'ro', isa => 'Metal::Integration::LastFM::Artist', lazy_build => 1);
 has geo      => (is => 'ro', isa => 'Metal::Integration::LastFM::Geo',    lazy_build => 1);
 has user     => (is => 'ro', isa => 'Metal::Integration::LastFM::User',   lazy_build => 1);
@@ -58,19 +60,6 @@ around [ qw(_album_plays _artist_plays) ] => sub {
 
     return $self->$orig($args, $lastfm_username);
 };
-
-################################################################################
-
-sub on_bot_public {
-    my $self  = shift;
-    my $event = shift;
-
-    my $output = $self->_attempt_command($event->{args});
-
-    $self->bot->message_channel($event->{args}->{channel}, $output);
-
-    return 1;
-}
 
 ################################################################################
 

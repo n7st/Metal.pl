@@ -3,11 +3,12 @@ package Metal::Module::Core::Connection;
 use Moose;
 
 extends 'Metal::Module';
-with    'Metal::Role::UserOrArg';
+with    qw(
+    Metal::Role::UserOrArg
+    Metal::Module::Role::WithCommands
+);
 
 ################################################################################
-
-has commands => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 
 around [ qw(_disconnect _reconnect) ] => sub {
     my $orig = shift;
@@ -22,17 +23,6 @@ around [ qw(_disconnect _reconnect) ] => sub {
 
     return $self->$orig($args);
 };
-
-################################################################################
-
-sub on_bot_public {
-    my $self  = shift;
-    my $event = shift;
-
-    $self->_attempt_command($event->{args});
-
-    return 1;
-}
 
 ################################################################################
 

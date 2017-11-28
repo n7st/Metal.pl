@@ -8,25 +8,12 @@ extends 'Metal::Module';
 with    qw(
     Metal::Role::Logger
     Metal::Module::Role::Blockable
+    Metal::Module::Role::WithCommands
 );
 
 ################################################################################
 
 has base_url => (is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
-has commands => (is => 'ro', isa => 'HashRef',    lazy_build => 1);
-
-################################################################################
-
-sub on_bot_public {
-    my $self  = shift;
-    my $event = shift;
-
-    my $output = $self->_attempt_command($event->{args});
-
-    $self->bot->message_channel($event->{args}->{channel}, $output);
-
-    return 1;
-}
 
 ################################################################################
 

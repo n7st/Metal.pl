@@ -24,5 +24,9 @@ RUN dzil smoke --release --author
 
 RUN [ "chmod", "+x", "/opt/Metal/script/metal.pl" ]
 
+# Database setup
+RUN [ "dbic-migration", "-Ilib", "prepare", "--schema_class=Metal::Schema", "--force_overwrite", "--force" ]
+RUN [ "dbic-migration", "-Ilib", "install", "--schema_class=Metal::Schema" ]
+
 ENTRYPOINT [ "/opt/Metal/script/metal.pl" ]
 
