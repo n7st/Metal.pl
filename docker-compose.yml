@@ -1,0 +1,8 @@
+version: "3"
+services:
+    bot:
+        build: .
+        command: perl script/metal.pl
+        volumes:
+            - ./data:/opt/Metal/data
+            - ./share:/opt/Metal/share
