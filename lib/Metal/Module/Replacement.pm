@@ -1,5 +1,6 @@
 package Metal::Module::Replacement;
 
+use Lingua::EN::Tagger;
 use Moose;
 
 extends 'Metal::Module';
@@ -17,13 +18,21 @@ sub on_bot_public {
     my $event = shift;
 
     if ($self->sometimes($self->minimum)) {
-        my @words = @{$event->{args}->{message_args}};
-        my $count = scalar @words - 1;
-        my $index = int(rand($count));
+        my $tagger   = Lingua::EN::Tagger->new();
+        my $sentence = $event->{args}->{message_arg_str};
+        my $tagged   = $tagger->add_tags($sentence);
+        my %words    = $tagger->get_nouns($tagged);
 
-        splice(@words, $index, 1, $self->replacement_word);
+        my @nouns = keys %words;
 
-        $self->bot->message_channel($event->{args}->{channel}, join(' ', @words));
+        return unless scalar @nouns;
+
+        my $noun  = @nouns[rand @nouns];
+        my $subs  = $self->replacement_word;
+
+        $sentence =~ s/\Q$noun\E/$subs/s;
+
+        $self->bot->message_channel($event->{args}->{channel}, $sentence);
     }
 
     return 1;
