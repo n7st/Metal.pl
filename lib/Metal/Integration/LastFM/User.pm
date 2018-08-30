@@ -155,6 +155,11 @@ sub now_playing {
         summary => "No recent tracks for ${user}",
     } unless $track;
 
+    return {
+        error   => 1,
+        summary => 'Invalid artist data returned from Last.FM',
+    } unless $artist && $artist->{artist};
+
     my $track_info = Metal::Integration::LastFM::User::TrackInfo->new({
         artist_data     => $artist->{artist},
         track_data      => $track,
@@ -212,8 +217,8 @@ sub _get_playcount_data {
     my $self = shift;
     my $node = shift;
 
-    my $user_playcount = $node->{userplaycount};
-    my $playcount      = $node->{playcount};
+    my $user_playcount = $node->{userplaycount} || 0;
+    my $playcount      = $node->{playcount}     || 0;
     my $percentage     = $self->percentage($user_playcount, $playcount);
 
     return ($user_playcount, $playcount, $percentage);
