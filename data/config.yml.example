@@ -11,6 +11,8 @@ irc:
     trigger: '!'
     channels:
         - '##somewhere'
+    # Set a server password (for /quote PASS)
+    #server_password: 'Someone:Something'
 
 changelog: https://netsplit.uk/bot_changelog.txt
 

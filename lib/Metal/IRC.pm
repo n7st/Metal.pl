@@ -222,6 +222,7 @@ sub _build_component {
         ircname  => $irc->{ircname},
         debug    => $irc->{debug},
         UseSSL   => $irc->{use_ssl},
+        Password => $irc->{server_password},
     );
 }
 
