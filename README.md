@@ -13,6 +13,7 @@ and [`Dist::Zilla`](https://metacpan.org/pod/Dist::Zilla).
 4. Install the prerequisites:
     * `dzil authordeps | cpanm`
     * `dzil listdeps | cpanm`
+5. Run the bot: `./script/metal.pl`
 
 ### Using Docker
 
