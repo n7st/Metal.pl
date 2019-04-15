@@ -1,3 +1,0 @@
-* Make the bot core work as a git submodule for custom modules?
-* Separate "custom" modules into other repositories.
-
