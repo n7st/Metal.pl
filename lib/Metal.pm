@@ -31,7 +31,7 @@ sub run {
     # Check if the bot has been launched before
     my $user_count = $self->db->resultset('User')->search_rs->count();
 
-    $self->_first_run_setup() unless $user_count;
+    #$self->_first_run_setup() unless $user_count;
     $self->bot->loaded_modules($self->modules);
 
     return $self->bot->run_all();
