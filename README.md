@@ -23,3 +23,19 @@ and [`Dist::Zilla`](https://metacpan.org/pod/Dist::Zilla).
 2. Copy `data/config.yml.example` to `data/config.yml` and edit it
 3. `docker-compose up`
 
+For development purposes, it may be useful to use the following
+`docker-compose.yml` file:
+
+```yaml
+version: "3"
+services:
+    bot:
+        build: .
+        command: perl script/metal.pl
+        volumes:
+            - .:/opt/Metal
+```
+
+This mounts the entire current directory, meaning you can edit files without
+rebuilding the entire container.
+
