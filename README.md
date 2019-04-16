@@ -14,6 +14,8 @@ and [`Dist::Zilla`](https://metacpan.org/pod/Dist::Zilla).
     * `dzil authordeps | cpanm`
     * `dzil listdeps | cpanm`
 5. Run the bot: `./script/metal.pl`
+6. Install the database (should create an SQLite database in `share`):
+    * `dbic-migration -Ilib --schema_class=Metal::Schema install_if_needed`
 
 ### Using Docker
 
