@@ -42,9 +42,7 @@ sub _query {
 ################################################################################
 
 sub _build_commands {
-    return {
-        wa => '_query',
-    }
+    return { wa => '_query' };
 }
 
 sub _build_wa {
