@@ -4,5 +4,4 @@ services:
         build: .
         command: perl script/metal.pl
         volumes:
-            - ./data:/opt/Metal/data
-            - ./share:/opt/Metal/share
+            - .:/opt/Metal

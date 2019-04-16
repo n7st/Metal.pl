@@ -42,9 +42,13 @@ loaded_modules:
     - Metal::Module::LastFM
     - Metal::Module::Replacement
     - Metal::Module::StatCounter
+    - Metal::Module::WolframAlpha
 
 # Settings for individual modules
 lastfm:
+    api_key: 1234
+
+wolfram_alpha:
     api_key: 1234
 
 replacement:
