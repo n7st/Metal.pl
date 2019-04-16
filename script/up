@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+cd /opt/Metal;
+
+dzil authordeps | xargs -n 5 -P 10 cpanm --notest --quiet;
+dzil listdeps --author | xargs -n 5 -P 10 cpanm --no-interactive --notest --quiet;
+
+export DBIC_MIGRATION_SCHEMA_CLASS=Metal::Schema;
+
+dbic-migration -Ilib install;
+dbic-migration -Ilib populate;
+
+perl script/metal.pl;
+

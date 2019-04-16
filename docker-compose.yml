@@ -2,6 +2,6 @@ version: "3"
 services:
     bot:
         build: .
-        command: perl script/metal.pl
+        command: ./script/up
         volumes:
             - .:/opt/Metal
