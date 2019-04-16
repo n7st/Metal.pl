@@ -10,9 +10,9 @@ and [`Dist::Zilla`](https://metacpan.org/pod/Dist::Zilla).
 1. Clone the repository.
 2. Copy `data/config.yml.example` to `data/config.yml`.
 3. Edit `data/config.yml` with your connection information.
-4. Install the prerequisites:
-    * `dzil authordeps | cpanm`
-    * `dzil listdeps | cpanm`
+4. Install the prerequisites (skipping their tests):
+    * `dzil authordeps | xargs -n 5 -P 10 cpanm --notest --quiet`
+    * `dzil listdeps --author | xargs -n 5 -P 10 cpanm --notest --quiet`
 5. Run the bot: `./script/metal.pl`
 6. Install the database (should create an SQLite database in `share`):
     * `dbic-migration -Ilib --schema_class=Metal::Schema install_if_needed`
