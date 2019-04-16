@@ -31,7 +31,7 @@ version: "3"
 services:
     bot:
         build: .
-        command: perl script/metal.pl
+        command: ./dev/up
         volumes:
             - .:/opt/Metal
 ```
