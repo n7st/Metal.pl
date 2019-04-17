@@ -13,6 +13,8 @@ has commands         => (is => 'ro', isa => 'ArrayRef',   lazy_build => 1);
 has graph_url        => (is => 'ro', isa => 'Maybe[Str]', lazy_build => 1);
 has max_stat_per_day => (is => 'ro', isa => 'Int',        lazy_build => 1);
 
+################################################################################
+
 around [ qw(_increment _decrement) ] => sub {
     my $orig   = shift;
     my $self   = shift;
@@ -100,7 +102,7 @@ sub _stats {
     my $count = $user->stats_rs->search_rs({
         'stat.name' => $handle,
     }, {
-        prefetch => [ 'stat' ],
+        prefetch => 'stat',
     })->all();
 
     return sprintf('%s count for %s: %d', $handle, $user->name, $count);

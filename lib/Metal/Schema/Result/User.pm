@@ -11,43 +11,47 @@ extends  'DBIx::Class::Core';
 __PACKAGE__->table('user');
 
 __PACKAGE__->load_components(qw(
+    +Metal::Schema::Helper::ID
     +Metal::Schema::Helper::DateFields
 ));
 
 __PACKAGE__->add_columns(
-    id       => {
-	data_type         => 'integer',
-	extra             => { unsigned => 1 },
-	is_auto_increment => 1,
-	is_nullable       => 0,
-    },
-    hostmask => {
+    'hostmask',
+    {
         data_type   => 'varchar',
         is_nullable => 0,
-        size        => 100
+        size        => 100,
     },
-    name     => {
+    'name',
+    {
         data_type   => 'varchar',
         is_nullable => 0,
-        size        => 45
+        size        => 45,
     },
-    lastfm   => {
+    'lastfm',
+    {
         data_type   => 'varchar',
         is_nullable => 1,
         size        => 20,
     },
-    ignored  => {
-        data_type   => 'integer',
-        size        => 0,
-        default     => 0,
-        is_nullable => 1,
+    'ignored',
+    {
+        data_type     => 'integer',
+        default_value => 0,
+        is_nullable   => 1,
+        size          => 0,
     },
 );
 
-__PACKAGE__->set_primary_key('id');
+__PACKAGE__->has_many(
+    roles => 'Metal::Schema::Result::UserRole',
+    { 'foreign.user_id' => 'self.id' },
+);
 
-__PACKAGE__->has_many('roles' => 'Metal::Schema::Result::UserRole', 'user_id');
-__PACKAGE__->has_many('stats' => 'Metal::Schema::Result::UserStat', 'user_id');
+__PACKAGE__->has_many(
+    stats => 'Metal::Schema::Result::UserStat',
+    { 'foreign.user_id' => 'self.id' },
+);
 
 ################################################################################
 
@@ -77,19 +81,11 @@ sub has_role {
     my $self = shift;
     my $name = shift;
 
-    my $roles_rs = $self->roles;
-    my $role;
-
-    while (my $user_role = $roles_rs->next()) {
-        if ($user_role->role->name eq $name) {
-            $role = $user_role->role;
-
-            last;
-        }
-    }
-
-    return 0 unless $role;
-    return $self->search_related('roles', { role_id => $role->id }) ? 1 : 0;
+    return $self->roles->search_rs({
+        'role.name' => $name,
+    }, {
+        prefetch => 'role',
+    })->first;
 }
 
 ################################################################################
@@ -117,7 +113,21 @@ Give the user access to a role.
 
 =item C<has_role()>
 
-Check if the user has access to a role.
+Check if the user has access to a role. Returns the requested role if it exists.
 
 =back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item * L<Metal::Schema::Result::UserRole>
+
+=item * L<Metal::Schema::Result::UserStat>
+
+=back
+
+=head1 AUTHOR
+
+Mike Jones L<email:mike@netsplit.org.uk>
 
