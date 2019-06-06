@@ -4,6 +4,8 @@ use JSON::XS    qw(decode_json);
 use LWP::Simple qw(get);
 use Moose;
 
+with 'Metal::Role::Logger';
+
 ################################################################################
 
 has api_key => (is => 'ro', isa => 'Str', required => 1);
@@ -28,9 +30,16 @@ sub _get_query {
 
     my $response = get($url);
 
-    return { error => 1, message => 'API call failed!' } unless $response;
+    my $error_ret = { error => 1, message => 'API call failed!' };
 
-    return decode_json($response);
+    return $error_ret unless $response;
+
+    my $ret;
+
+    eval { $ret = decode_json($response) };
+    $self->logger->warn($@) if $@;
+
+    return $ret || $error_ret;
 }
 
 ################################################################################

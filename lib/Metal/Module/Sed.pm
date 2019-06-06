@@ -3,7 +3,6 @@ package Metal::Module::Sed;
 use Moose;
 
 extends 'Metal::Module';
-with    'Metal::Role::Logger';
 
 ################################################################################
 
