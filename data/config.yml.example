@@ -8,7 +8,8 @@ irc:
     ircname: Metal - Perl IRC Bot
     use_ssl: 1
     debug: 1
-    trigger: '!'
+    triggers:
+        - '!'
     channels:
         - '##somewhere'
     # Set a server password (for /quote PASS)

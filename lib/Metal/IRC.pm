@@ -10,6 +10,7 @@ use utf8::all;
 
 extends 'Reflex::Base';
 with    qw(
+    Metal::Role::Config
     Metal::Role::Logger
     Reflex::Role::Reactive
 );
@@ -19,10 +20,9 @@ our $VERSION = 0.01;
 ################################################################################
 
 has component => (is => 'rw', isa => 'POE::Component::IRC::State', lazy_build => 1);
-has trigger   => (is => 'ro', isa => 'Str',                        lazy_build => 1);
+has triggers  => (is => 'ro', isa => 'ArrayRef',                   lazy_build => 1);
 
-has config => (is => 'ro', isa => 'HashRef',       required => 1);
-has db     => (is => 'ro', isa => 'Metal::Schema', required => 1);
+has db => (is => 'ro', isa => 'Metal::Schema', required => 1);
 
 has loaded_modules => (is => 'rw', isa => 'HashRef');
 
@@ -110,12 +110,12 @@ sub on_poco_irc_public {
 
     my $message      = $event->{args}->[2];
     my @message_args = split / /, $message;
-    my $trigger      = $self->trigger;
+    my $triggers     = join '', @{$self->triggers};
     my $command      = '';
 
-    if ($message_args[0] =~ /^\Q$trigger\E/) {
+    if ($message_args[0] =~ /^[${triggers}]/) {
         $command = shift @message_args;
-        $command =~ s/^\Q$trigger\E//s;
+        $command =~ s/^[${triggers}]//s;
     }
 
     return $self->_emit_named_argument_event('public', {
@@ -226,10 +226,20 @@ sub _build_component {
     );
 }
 
-sub _build_trigger {
+sub _build_triggers {
     my $self = shift;
 
-    return $self->config->{irc}->{trigger} || '!';
+    my $irc_cfg = $self->config->{irc};
+
+    if ($irc_cfg->{triggers}) {
+        return $irc_cfg->{triggers};
+    }
+
+    if ($irc_cfg->{trigger}) {
+        return [ $irc_cfg->{trigger} ];
+    }
+
+    return [ $self->config_util->default_trigger ];
 }
 
 ################################################################################
@@ -258,9 +268,9 @@ summarise event arguments.
 POE::Component::IRC::State accessor which can receive commands to return to the
 IRC server.
 
-=item C<trigger>
+=item C<triggers>
 
-Character used for triggering bot commands.
+Character(s) used for triggering bot commands.
 
 =item C<config>
 
@@ -276,7 +286,7 @@ Active (i.e. currently watching) bot modules.
 
 =item C<poco_watcher>
 
-Reflex watcher which receives events from C<POE::Component::IRC::State>.
+Reflex watcher which receives events from L<POE::Component::IRC::State>.
 
 =back
 
@@ -286,7 +296,7 @@ Reflex watcher which receives events from C<POE::Component::IRC::State>.
 
 =item C<BUILD()>
 
-Sets up the watcher for C<POE::Component::IRC::State> and initialises plugins
+Sets up the watcher for L<POE::Component::IRC::State> and initialises plugins
 for the same. Runtime events for the component are also triggered.
 
 =item C<message_channel()>
@@ -334,11 +344,11 @@ The following items have documentation on CPAN:
 
 =over 4
 
-=item C<Reflex>
+=item L<Reflex>
 
-=item C<POE::Component::IRC>
+=item L<POE::Component::IRC>
 
-=item C<POE::Component::IRC::State>
+=item L<POE::Component::IRC::State>
 
 =back
 

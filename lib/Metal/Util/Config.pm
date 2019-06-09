@@ -9,6 +9,8 @@ has config => (is => 'ro', isa => 'HashRef', lazy_build => 1);
 
 has filename => (is => 'ro', isa => 'Str', required => 1);
 
+has default_trigger => (is => 'ro', isa => 'Str', default => '!');
+
 ################################################################################
 
 sub _build_config {
