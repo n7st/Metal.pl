@@ -20,9 +20,7 @@ $config ||= 'data/config.yml';
 # For access later
 $ENV{METAL_CFG_FILE} = $config;
 
-my $metal = Metal->new({
-    config_file => $config,
-});
+my $metal = Metal->new();
 
 exit $metal->run();
 
